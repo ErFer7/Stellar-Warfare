@@ -3,6 +3,13 @@
 
 __BEGIN_API
 
+// Adicionei este construtor aqui porque acho que o professor esqueceu de adicionar
+template<typename ... Tn>
+CPU::Context::Context(void (* func)(Tn ...), Tn ... an)
+{
+
+}
+
 void CPU::Context::save()
 {
     //adicionar implementação
@@ -20,7 +27,7 @@ CPU::Context::~Context()
 
 int CPU::switch_context(Context *from, Context *to)
 {
-     //implementação do método
+    //implementação do método
 }
 
 __END_API

@@ -38,6 +38,25 @@ class CPU
 
 };
 
+// O construtor com templates não pode ser definido no arquivo de código fonte
+template <typename... Tn>
+CPU::Context::Context(void (*func)(Tn...), Tn... an) {
+    getcontext(&this->_context);
+
+    this->_stack = new char[STACK_SIZE];
+
+    if (!this->_stack) {
+        exit(-1);  // Caso a alocação do stack falhe
+    }
+
+    this->_context.uc_link = 0;
+    this->_context.uc_stack.ss_sp = (void *)(this->_stack);
+    this->_context.uc_stack.ss_size = STACK_SIZE;
+    this->_context.uc_stack.ss_flags = 0;
+
+    makecontext(&this->_context, (void (*)())func, sizeof...(an), an...);
+}
+
 __END_API
 
 #endif

@@ -1,52 +1,28 @@
-# tool macros
-CC ?= g++
+CC := g++
 CFLAGS := -O3
-DBGFLAGS := -O3 -g
-COBJFLAGS := $(CFLAGS) -c
+DBGFLAGS := -g
 
-# path macros
 BIN_PATH := bin
-OBJ_PATH := obj
 SRC_PATH := src
 DBG_PATH := debug
 
-# compile macros
 TARGET_NAME := INE5412OS
 TARGET := $(BIN_PATH)/$(TARGET_NAME)
 TARGET_DEBUG := $(DBG_PATH)/$(TARGET_NAME)
 
-# src files & obj files
 SRC := $(foreach x, $(SRC_PATH), $(wildcard $(addprefix $(x)/*,.c*)))
-OBJ := $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
-OBJ_DEBUG := $(addprefix $(DBG_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
 
-# clean files list
-DISTCLEAN_LIST := $(OBJ) \
-                  $(OBJ_DEBUG)
-CLEAN_LIST := $(TARGET) \
-			  $(TARGET_DEBUG) \
-			  $(DISTCLEAN_LIST)
-
-# default rule
 default: makedir all
 
-# non-phony targets
-$(TARGET): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(CFLAGS)
+$(TARGET): $(SRC)
+	$(CC) $(SRC) $(CFLAGS) -o $@
 
-$(OBJ_PATH)/%.o: $(SRC_PATH)/%.c*
-	$(CC) $(COBJFLAGS) -o $@ $<
+$(TARGET_DEBUG): $(SRC)
+	$(CC) $(SRC) $(CFLAGS) $(DBGFLAGS) -o $@
 
-$(DBG_PATH)/%.o: $(SRC_PATH)/%.c*
-	$(CC) $(COBJFLAGS) $(DBGFLAGS) -o $@ $<
-
-$(TARGET_DEBUG): $(OBJ_DEBUG)
-	$(CC) $(CFLAGS) $(DBGFLAGS) $(OBJ_DEBUG) -o $@
-
-# phony rules
 .PHONY: makedir
 makedir:
-	@mkdir -p $(BIN_PATH) $(OBJ_PATH) $(DBG_PATH)
+	@mkdir -p $(BIN_PATH) $(DBG_PATH)
 
 .PHONY: all
 all: $(TARGET)
@@ -56,10 +32,7 @@ debug: $(TARGET_DEBUG)
 
 .PHONY: clean
 clean:
-	@echo CLEAN $(CLEAN_LIST)
-	@rm -f $(CLEAN_LIST)
-
-.PHONY: distclean
-distclean:
-	@echo CLEAN $(DISTCLEAN_LIST)
-	@rm -f $(DISTCLEAN_LIST)
+	@echo CLEAN $(TARGET)
+	@echo CLEAN $(TARGET_DEBUG)
+	@rm -f $(TARGET)
+	@rm -f $(TARGET_DEBUG)

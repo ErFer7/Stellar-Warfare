@@ -1,33 +1,34 @@
 #include "cpu.h"
+
 #include <iostream>
 
 __BEGIN_API
 
-// Adicionei este construtor aqui porque acho que o professor esqueceu de adicionar
-template<typename ... Tn>
-CPU::Context::Context(void (* func)(Tn ...), Tn ... an)
-{
-
+void CPU::Context::save() {
+    getcontext(&this->_context);
 }
 
-void CPU::Context::save()
-{
-    //adicionar implementação
+void CPU::Context::load() {
+    if (&this->_context) {
+        setcontext(&this->_context);
+    }
 }
 
-void CPU::Context::load()
-{
-    //adicionar implementação
+// TODO: Corrigir as chamadas extras no delete (Teste com o Valgrind)
+CPU::Context::~Context() {
+    if (this->_stack) {
+        delete (this->_stack);
+        this->_stack = NULL;
+    }
 }
 
-CPU::Context::~Context()
-{
-    //adicionar implementação
-}
+int CPU::switch_context(Context *from, Context *to) {
+    if (!from || !to) {
+        return -1;
+    }
 
-int CPU::switch_context(Context *from, Context *to)
-{
-    //implementação do método
+    swapcontext(&from->_context, &to->_context);
+    return 0;
 }
 
 __END_API

@@ -14,10 +14,9 @@ void CPU::Context::load() {
     }
 }
 
-// TODO: Corrigir as chamadas extras no delete (Teste com o Valgrind)
 CPU::Context::~Context() {
     if (this->_stack) {
-        delete (this->_stack);
+        delete[] this->_stack;
         this->_stack = NULL;
     }
 }

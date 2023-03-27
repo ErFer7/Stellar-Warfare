@@ -2,10 +2,9 @@
 
 __BEGIN_API
 
-CPU::Context *Main::ContextMain = 0;
-CPU::Context *Main::ping = 0;
-CPU::Context *Main::pong = 0;
-std::string Main::ping_name;
-std::string Main::pong_name;
+Thread *Main::ThreadMain = 0;
+Thread *Main::ping = 0;
+Thread *Main::pong = 0;
+CPU::Context *Main::mainContext;
 
 __END_API

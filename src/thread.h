@@ -45,7 +45,7 @@ public:
     /*
      * Retorna o ID da thread.
      */
-    int id();
+    int id() { return this->_id; }
 
     /*
      * Retorna o contexto da thread.
@@ -67,13 +67,16 @@ private:
 template <typename... Tn>
 Thread::Thread(void (*func)(Tn...), Tn... an)
 {
+    db<Thread>(TRC) << "Thread::Thread(func=" << (void *)func << ", an=" << (void *)&an << ")\n";
     this->_context = new Context(func, an...);
     if (this->_context)
     {
         this->_id = _id_counter++;
+        db<Thread>(INF) << "Thread: created context " << this->_context << " for thread " << this->_id << "\n";
     }
     else
     {
+        db<Thread>(ERR) << "Thread: failed to create context!\n";
         exit(-1);
     }
 }

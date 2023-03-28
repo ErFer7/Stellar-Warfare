@@ -9,44 +9,47 @@ __BEGIN_API
 
 class CPU
 {
-    public:
-
-        class Context
-        {
-        private:
-            static const unsigned int STACK_SIZE = Traits<CPU>::STACK_SIZE;
-        public:
-            Context() { _stack = 0; }
-
-            template<typename ... Tn>
-            Context(void (* func)(Tn ...), Tn ... an);
-
-            ~Context();
-
-            void save();
-            void load();
-
-        private:            
-            char *_stack;
-        public:
-            ucontext_t _context;
-        };
+public:
+    class Context
+    {
+    private:
+        static const unsigned int STACK_SIZE = Traits<CPU>::STACK_SIZE;
 
     public:
+        Context() { _stack = 0; }
 
-        static int switch_context(Context *from, Context *to);
+        template <typename... Tn>
+        Context(void (*func)(Tn...), Tn... an);
 
+        ~Context();
+
+        void save();
+        void load();
+
+    private:
+        char *_stack;
+
+    public:
+        ucontext_t _context;
+    };
+
+public:
+    static int switch_context(Context *from, Context *to);
 };
 
 // O construtor com templates não pode ser definido no arquivo de código fonte
 template <typename... Tn>
-CPU::Context::Context(void (*func)(Tn...), Tn... an) {
+CPU::Context::Context(void (*func)(Tn...), Tn... an)
+{
+    db<CPU>(TRC) << "CPU::Context constructor called\n";
     getcontext(&this->_context);
 
     this->_stack = new char[STACK_SIZE];
 
-    if (!this->_stack) {
-        exit(-1);  // Caso a alocação do stack falhe
+    if (!this->_stack)
+    {
+        db<CPU>(ERR) << "CPU::Context constructor failed to allocate stack\n";
+        exit(-1); // Caso a alocação do stack falhe
     }
 
     this->_context.uc_link = 0;
@@ -55,9 +58,9 @@ CPU::Context::Context(void (*func)(Tn...), Tn... an) {
     this->_context.uc_stack.ss_flags = 0;
 
     makecontext(&this->_context, (void (*)())func, sizeof...(an), an...);
+    db<CPU>(INF) << "CPU::Context constructor finished\n";
 }
 
 __END_API
 
 #endif
-

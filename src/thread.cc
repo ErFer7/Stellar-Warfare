@@ -2,6 +2,10 @@
 
 __BEGIN_API
 
+// Inicialização das variáveis
+int Thread::_id_counter = 0;
+Thread *Thread::_running = nullptr;
+
 int Thread::switch_context(Thread * prev, Thread * next){
     return CPU::switch_context(prev->_context, next->_context);
 }

@@ -8,7 +8,8 @@ Thread *Thread::_running = nullptr;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
-    if (prev == nullptr || next == nullptr)
+    // O valor de retorno já está implementado em switch_context, mas isso aqui é ok
+    if (prev == nullptr || next == nullptr)  // Poderia ser (!prev || !next). Mas isso é só detalhe
     {
         db<Thread>(ERR) << "switch_context: prev or next is null\n";
         return -1;
@@ -20,9 +21,17 @@ int Thread::switch_context(Thread *prev, Thread *next)
 
 void Thread::thread_exit(int exit_code)
 {
-    this->_context->~Context();
-    delete _context;
+    delete this->_context;
+
     // give control to main?
+
+    // Acredito que rentornar o controle para a main seja redefinir _running
+    // mas não tenho certeza
+
+    // _running = nullptr;  // Talvez isso?
+
+    // Acho que isso também seja necessário
+    _id_counter--;
 }
 
 __END_API

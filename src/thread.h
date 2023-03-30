@@ -67,7 +67,7 @@ private:
 template <typename... Tn>
 Thread::Thread(void (*func)(Tn...), Tn... an)
 {
-    db<Thread>(TRC) << "Thread::Thread(func=" << (void *)func << ", an=" << (void *)&an << ")\n";
+    // db<Thread>(TRC) << "Thread::Thread(func=" << (void *)func << ", an=" << (void *)&an << ")\n";
     this->_context = new Context(func, an...);
     if (this->_context)
     {

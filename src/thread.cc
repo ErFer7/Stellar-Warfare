@@ -1,4 +1,5 @@
 #include "thread.h"
+#include "main_class.h"
 
 __BEGIN_API
 
@@ -32,6 +33,7 @@ void Thread::thread_exit(int exit_code)
 
     // Acho que isso também seja necessário
     _id_counter--;
+    Thread::switch_context(this, Main::mainThread());
 }
 
 __END_API

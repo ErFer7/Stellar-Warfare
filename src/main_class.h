@@ -39,6 +39,11 @@ public:
         CPU::switch_context(ThreadMain->context(), mainContext);
     }
 
+    static Thread* mainThread()
+    {
+        return ThreadMain;
+    }
+
     ~Main()
     {
         ThreadMain->thread_exit(0);

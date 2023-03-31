@@ -21,16 +21,21 @@ void CPU::Context::load()
 
 CPU::Context::~Context()
 {
+    db<CPU>(TRC) << "CPU::Context destructor called\n";
     if (this->_stack)
     {
         delete[] this->_stack;
         this->_stack = NULL;
     }
-    db<CPU>(TRC) << "CPU::Context destructor called\n";
+    else
+    {
+        db<CPU>(ERR) << "CPU::Context destructor tried to deallocate null stack\n";
+    }
 }
 
 int CPU::switch_context(Context *from, Context *to)
 {
+    db<CPU>(TRC) << "CPU::switch_context called\n";
     if (!from || !to)
     {
         db<CPU>(ERR) << "CPU::switch_context: from or to is null\n";
@@ -38,7 +43,7 @@ int CPU::switch_context(Context *from, Context *to)
     }
 
     swapcontext(&from->_context, &to->_context);
-    db<CPU>(TRC) << "CPU::switch_context: from=" << from << " to=" << to << "\n";
+    db<CPU>(INF) << "CPU::switch_context: from =" << from << " to =" << to << "\n";
     return 0;
 }
 

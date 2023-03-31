@@ -9,7 +9,8 @@
 
 __BEGIN_API
 
-class CPU; //declaração das classes criadas nos trabalhos devem ser colocadas aqui
+//declaração das classes
+class CPU;
 class Debug;
 class Thread;
 

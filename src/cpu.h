@@ -50,7 +50,7 @@ CPU::Context::Context(void (*func)(Tn...), Tn... an)
     if (!this->_stack)
     {
         db<CPU>(ERR) << "CPU::Context constructor failed to allocate stack\n";
-        exit(-1); // Caso a alocação do stack falhe
+        exit(-1);
     }
 
     this->_context.uc_link = 0;
@@ -59,7 +59,7 @@ CPU::Context::Context(void (*func)(Tn...), Tn... an)
     this->_context.uc_stack.ss_flags = 0;
 
     makecontext(&this->_context, (void (*)())func, sizeof...(an), an...);
-    db<CPU>(INF) << "CPU::Context constructor finished\n";
+    db<CPU>(INF) << "CPU::Context constructor finished successfully\n";
 }
 
 __END_API

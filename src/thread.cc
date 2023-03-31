@@ -9,30 +9,23 @@ Thread *Thread::_running = nullptr;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
-    // O valor de retorno já está implementado em switch_context, mas isso aqui é ok
-    if (prev == nullptr || next == nullptr)  // Poderia ser (!prev || !next). Mas isso é só detalhe
+    db<Thread>(TRC) << "Thread::switch_context called\n";
+    if (!prev || !next)
     {
-        db<Thread>(ERR) << "switch_context: prev or next is null\n";
+        db<Thread>(ERR) << "Thread::switch_context: prev or next is null\n";
         return -1;
     }
     _running = next;
-    db<Thread>(TRC) << "switch_context: prev=" << prev->_id << " next=" << next->_id << "\n";
+    db<Thread>(INF) << "Thread::switch_context: from =" << prev->_id << " to =" << next->_id << "\n";
     return CPU::switch_context(prev->_context, next->_context);
 }
 
 void Thread::thread_exit(int exit_code)
 {
+    db<Thread>(TRC) << "Thread::thread_exit called\n";
     delete this->_context;
 
-    // give control to main?
-
-    // Acredito que rentornar o controle para a main seja redefinir _running
-    // mas não tenho certeza
-
-    // _running = nullptr;  // Talvez isso?
-
-    // Acho que isso também seja necessário
-    _id_counter--;
+    db<Thread>(INF) << "Thread::thread_exit: thread " << this->_id << " exited with code " << exit_code << "\n";
     Thread::switch_context(this, Main::mainThread());
 }
 

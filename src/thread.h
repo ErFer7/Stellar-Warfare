@@ -58,21 +58,17 @@ private:
     static Thread *_running;
     // Atributos adcionados:
     static int _id_counter;
-
-    /*
-     * Qualquer outro atributo que você achar necessário para a solução.
-     */
 };
 
 template <typename... Tn>
 Thread::Thread(void (*func)(Tn...), Tn... an)
 {
-    // db<Thread>(TRC) << "Thread::Thread(func=" << (void *)func << ", an=" << (void *)&an << ")\n";
+    db<Thread>(TRC) << "Thread constructor called\n";
     this->_context = new Context(func, an...);
     if (this->_context)
     {
         this->_id = _id_counter++;
-        db<Thread>(INF) << "Thread: created context " << this->_context << " for thread " << this->_id << "\n";
+        db<Thread>(INF) << "Created Thread with context: " << this->_context << " for thread: " << this->_id << "\n";
     }
     else
     {

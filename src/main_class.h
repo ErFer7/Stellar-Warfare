@@ -11,93 +11,60 @@ __BEGIN_API
 class Main
 {
 public:
-    Main()
-    {
-        main_name = "main";
-        ping_name = "    Ping";
-        pong_name = "        Pong";
-        ThreadMain = new Thread(run, (char *)main_name.data());
-        ping = new Thread(func_ping, (char *)ping_name.data());
-        pong = new Thread(func_pong, (char *)pong_name.data());
-
-        mainContext = new CPU::Context();
-
-        CPU::switch_context(mainContext, ThreadMain->context());
-
-        delete mainContext;
+    Main() {
     }
 
-    static void run(char *arg)
-    {
-        std::cout << arg << ": inicio\n";
+    static void run(void * name) {
+        std::cout << (char *) name << ": inicio\n";
 
-        Thread::switch_context(ThreadMain, ping);
-        Thread::switch_context(ThreadMain, pong);
+        std::string pang_name = "   Pang";
+        std::string peng_name = "       Peng";
+        std::string ping_name = "           Ping";
+        std::string pong_name = "               Pong";
+        std::string pung_name = "                   Pung";
 
-        std::cout << arg << ": fim\n";
+        ping_pong_threads[0] = new Thread(body, (char *) pang_name.data(), 0);
+        ping_pong_threads[1] = new Thread(body, (char *) peng_name.data(), 1);
+        ping_pong_threads[2] = new Thread(body, (char *) ping_name.data(), 2);
+        ping_pong_threads[3] = new Thread(body, (char *) pong_name.data(), 3);
+        ping_pong_threads[4] = new Thread(body, (char *) pung_name.data(), 4);
 
-        CPU::switch_context(ThreadMain->context(), mainContext);
+        Thread::yield();
+
+        std::cout << (char *) name << ": fim\n";
+
+        delete ping_pong_threads[0];
+        delete ping_pong_threads[1];
+        delete ping_pong_threads[2];
+        delete ping_pong_threads[3];
+        delete ping_pong_threads[4];
     }
 
-    static Thread* mainThread()
-    {
-        return ThreadMain;
-    }
-
-    ~Main()
-    {
-        ThreadMain->thread_exit(0);
-        ping->thread_exit(0);
-        pong->thread_exit(0);
-        delete ThreadMain;
-        delete ping;
-        delete pong;
-    }
+    ~Main() {}
 
 private:
+
     static const int ITERATIONS = 10;
 
-    static void func_ping(char *arg)
+    static void body(char *name, int id)
     {
-        int i;
+        int i ;
 
-        std::cout << arg << ": inicio\n";
+        std::cout << name << ": inicio\n";
 
         for (i = 0; i < ITERATIONS; i++)
         {
-            std::cout << arg << i << "\n";
-            Thread::switch_context(ping, pong);
+            std::cout << name << ": " << i << "\n" ;
+            Thread::yield();
         }
-        std::cout << arg << ": fim\n";
+        std::cout << name << ": fim\n";
 
-        Thread::switch_context(ping, ThreadMain);
+
+        ping_pong_threads[id]->thread_exit(0);
     }
 
-    static void func_pong(char *arg)
-    {
-        int i;
-
-        std::cout << arg << ": inicio\n";
-
-        for (i = 0; i < ITERATIONS; i++)
-        {
-            std::cout << arg << i << "\n";
-            Thread::switch_context(pong, ping);
-        }
-        std::cout << arg << ": fim\n";
-
-        Thread::switch_context(pong, ThreadMain);
-    }
-
-private:
-    static Thread *ThreadMain;
-    static Thread *ping;
-    static Thread *pong;
-    static CPU::Context *mainContext;
-
-    std::string main_name;
-    std::string ping_name;
-    std::string pong_name;
+    private:
+        static Thread *ping_pong_threads[5];
 };
 
 __END_API

@@ -8,4 +8,4 @@ Autores: Eric Fernandes Evaristo e Victor Hugo Bonacina Pergher
 
 ## Instruções
 
-Compile o projeto com o comando `make`, use a opção `debug` se necessário. O executável será gerado na pasta **bin** ou **debug** dependendo da opção de compilação.
+Compile o projeto com o comando `make`. O executável será gerado na pasta **bin**.

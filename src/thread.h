@@ -109,17 +109,24 @@ private:
 
     // Atributos adcionados:
     static int _id_counter;
+    static int _thread_count;
 };
 
 template <typename... Tn>
-Thread::Thread(void (*func)(Tn...), Tn... an)
+Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()))
 {
     db<Thread>(TRC) << "Thread constructor called\n";
     this->_context = new Context(func, an...);
+
     if (this->_context)
     {
+        _thread_count++;
         this->_id = _id_counter++;
+        this->_state = READY;
+        _ready.insert(&_link);  // TODO: Verificar se a inserção está correta
+
         db<Thread>(INF) << "Created Thread with context: " << this->_context << " for thread: " << this->_id << "\n";
+        db<Thread>(INF) << "Current thread count: " << _thread_count << "\n";
     }
     else
     {

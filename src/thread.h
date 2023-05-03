@@ -122,8 +122,12 @@ Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::durati
     {
         _thread_count++;
         this->_id = _id_counter++;
-        this->_state = READY;
-        _ready.insert(&_link);  // TODO: Verificar se a inserção está correta
+
+        if (this->_id != 0)  // A thread main não deve ser inserida na fila de prontos
+        {
+            this->_state = READY;
+            _ready.insert(&_link);
+        }
 
         db<Thread>(INF) << "Created Thread with context: " << this->_context << " for thread: " << this->_id << "\n";
         db<Thread>(INF) << "Current thread count: " << _thread_count << "\n";

@@ -109,7 +109,6 @@ private:
 
     // Atributos adcionados:
     static int _id_counter;
-    static int _thread_count;
 };
 
 template <typename... Tn>
@@ -120,7 +119,6 @@ Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::durati
 
     if (this->_context)
     {
-        _thread_count++;
         this->_id = _id_counter++;
 
         if (this->_id != 0)  // A thread main não deve ser inserida na fila de prontos
@@ -130,7 +128,6 @@ Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::durati
         }
 
         db<Thread>(INF) << "Created Thread with context: " << this->_context << " for thread: " << this->_id << "\n";
-        db<Thread>(INF) << "Current thread count: " << _thread_count << "\n";
     }
     else
     {

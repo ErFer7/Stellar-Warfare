@@ -6,7 +6,6 @@ __BEGIN_API
 // Inicialização das variáveis
 int Thread::_id_counter = 0;
 Thread *Thread::_running = nullptr;
-int Thread::_thread_count = 0;
 Thread::Ready_Queue Thread::_ready;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
@@ -31,9 +30,7 @@ int Thread::switch_context(Thread *prev, Thread *next)
 void Thread::thread_exit(int exit_code)
 {
     db<Thread>(TRC) << "Thread::thread_exit called by thread" << _running->_id << " with code " << exit_code << "\n";
-
     this->_state = FINISHING;
-    _thread_count--;
     yield();
 }
 
@@ -41,31 +38,23 @@ void Thread::dispatcher()
 {
     db<Thread>(TRC) << "Thread::dispatcher called\n";
 
-    while(_thread_count > 2)  // As duas threads que estão sempre em execução são a main e a dispatcher
+    while(_ready.size() > 1)
     {
-        // Verificar se a verificação é necessária (:p)
-        if(_ready.empty())
-        {
-            db<Thread>(INF) << "Thread::dispatcher: ready queue is empty\n";
-            break;
-        }
-
-        Thread *next = _ready.remove()->object();  // TODO: Verificar se a remoção está correta
-        db<Thread>(INF) << "Thread::dispatcher: next thread is " << next->_id << "\n";
-        Thread::switch_context(_running, next);
+        Thread *next = _ready.remove()->object();
+        db<Thread>(INF) << "Thread::dispatcher: the next thread is " << next->_id << "\n";
 
         _dispatcher._state = READY;
         _ready.insert(&_dispatcher._link);
 
+        _running = next;
         _running->_state = RUNNING;
-        next->_state = RUNNING;
 
         switch_context(&_dispatcher, _running);
 
         if (_running->_state == FINISHING)
         {
             db<Thread>(INF) << "Thread::dispatcher: thread " << _running->_id << " finished\n";
-            _ready.remove(next);
+            _ready.remove(_running);
         }
     }
 
@@ -85,7 +74,7 @@ void Thread::init(void (*main)(void *))
     new (&_main) Thread(main, (void*)"main");
     new (&_dispatcher) Thread(&dispatcher);
 
-    new (&_main_context) CPU::Context();  // TODO: Verificar se a inicialização está correta
+    new (&_main_context) CPU::Context();
 
     _running = &_main;
     _main._state = RUNNING;
@@ -97,14 +86,13 @@ void Thread::yield()
 {
     db<Thread>(TRC) << "Thread::yield called by thread " << _running->_id << "\n";
 
-    // Verificar se a verificação é necessária (:p)
     if(_ready.empty())
     {
         db<Thread>(INF) << "Thread::dispatcher: ready queue is empty\n";
         return;
     }
 
-    Thread *next = _ready.remove()->object();  // TODO: Verificar se a remoção está certa
+    Thread *next = _ready.remove()->object();
 
     if (_running->_state != FINISHING && _main._id != _running->_id)
     {

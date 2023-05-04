@@ -59,7 +59,7 @@ CPU::Context::Context(void (*func)(Tn...), Tn... an)
     this->_context.uc_stack.ss_flags = 0;
 
     makecontext(&this->_context, (void (*)())func, sizeof...(an), an...);
-    db<CPU>(INF) << "CPU::Context constructor finished successfully\n";
+    db<CPU>(INF) << "CPU::Context new Context " << this << " created successfully\n";
 }
 
 __END_API

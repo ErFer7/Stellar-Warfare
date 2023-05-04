@@ -21,7 +21,7 @@ void CPU::Context::load()
 
 CPU::Context::~Context()
 {
-    db<CPU>(TRC) << "CPU::Context destructor called\n";
+    db<CPU>(TRC) << "CPU::Context destructor called by Context " << this << "\n";
     if (this->_stack)
     {
         delete[] this->_stack;
@@ -42,8 +42,8 @@ int CPU::switch_context(Context *from, Context *to)
         return -1;
     }
 
-    swapcontext(&from->_context, &to->_context);
     db<CPU>(INF) << "CPU::switch_context: from =" << from << " to =" << to << "\n";
+    swapcontext(&from->_context, &to->_context);
     return 0;
 }
 

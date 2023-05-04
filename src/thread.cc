@@ -38,13 +38,12 @@ void Thread::dispatcher()
 {
     db<Thread>(TRC) << "Thread::dispatcher called\n";
 
-    while(_ready.size() > 1)
+    while(_ready.size() > 0)
     {
         Thread *next = _ready.remove()->object();
         db<Thread>(INF) << "Thread::dispatcher: the next thread is " << next->_id << "\n";
 
         _dispatcher._state = READY;
-        _ready.insert(&_dispatcher._link);
 
         _running = next;
         _running->_state = RUNNING;
@@ -60,7 +59,6 @@ void Thread::dispatcher()
 
     db<Thread>(INF) << "Thread::dispatcher: no more threads to run\n";
     _dispatcher._state = FINISHING;
-    _ready.remove(&_dispatcher._link);
 
     db<Thread>(INF) << "Thread::dispatcher: exiting\n";
     switch_context(&_dispatcher, &_main);
@@ -70,15 +68,16 @@ void Thread::init(void (*main)(void *))
 {
     db<Thread>(TRC) << "Thread::init called\n";
 
+    new (&_main_context) CPU::Context();
+
     new (&_ready) Ready_Queue();
     new (&_main) Thread(main, (void*)"main");
-    new (&_dispatcher) Thread(&dispatcher);
-
-    new (&_main_context) CPU::Context();
+    new (&_dispatcher) Thread(dispatcher);
 
     _running = &_main;
     _main._state = RUNNING;
 
+    db<Thread>(TRC) << "Thread::init switching to main\n";
     CPU::switch_context(&_main_context, _main.context());
 }
 
@@ -92,8 +91,6 @@ void Thread::yield()
         return;
     }
 
-    Thread *next = _ready.remove()->object();
-
     if (_running->_state != FINISHING && _main._id != _running->_id)
     {
         int now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
@@ -105,9 +102,8 @@ void Thread::yield()
 
     Thread *_previous = _running;
 
-    _running = next;
+    _running = &_dispatcher;
     _running->_state = RUNNING;
-    _ready.remove(_running);
 
     db<Thread>(INF) << "Thread::yield: switching from " << _previous->_id << " to " << _running->_id << "\n";
     switch_context(_previous, _running);
@@ -115,6 +111,7 @@ void Thread::yield()
 
 Thread::~Thread()
 {
+    db<Thread>(TRC) << "Destructor called by thread " << this->_id << "\n";
     delete this->_context;
 }
 

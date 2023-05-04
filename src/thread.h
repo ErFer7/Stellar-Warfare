@@ -120,10 +120,10 @@ Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::durati
     if (this->_context)
     {
         this->_id = _id_counter++;
+        this->_state = READY;
 
-        if (this->_id != 0)  // A thread main não deve ser inserida na fila de prontos
+        if (this->_id > 1)  // A thread main e a dispatcher não são inseridas na fila de prontos
         {
-            this->_state = READY;
             _ready.insert(&_link);
         }
 

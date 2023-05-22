@@ -22,7 +22,7 @@ class Lists;
 template <typename T>
 struct Traits
 {
-    static const bool debugged = false;
+    static const bool debugged = true;
 };
 
 template <>
@@ -38,19 +38,19 @@ template <>
 struct Traits<CPU> : public Traits<void>
 {
     static const unsigned int STACK_SIZE = 2097152;
-    static const bool debugged = false;
+    static const bool debugged = true;
 };
 
 template <>
 struct Traits<Thread> : public Traits<void>
 {
-    static const bool debugged = false;
+    static const bool debugged = true;
 };
 
 template <>
 struct Traits<System> : public Traits<void>
 {
-    static const bool debugged = false;
+    static const bool debugged = true;
 };
 
 template <>

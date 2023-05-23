@@ -70,11 +70,8 @@ void Thread::init(void (*main)(void *))
 {
     db<Thread>(TRC) << "Thread::init called\n";
 
-    // new (&_ready) Ready_Queue();
     new (&_main) Thread(main, (void*)"main");
     new (&_dispatcher) Thread(&dispatcher);
-
-    // new (&_main_context) CPU::Context();
 
     _running = &_main;
     _main._state = RUNNING;
@@ -96,7 +93,6 @@ void Thread::yield()
     }
 
     _running->_state = READY; 
-
     Thread *_previous = _running;
 
     _running = next;

@@ -14,21 +14,23 @@ class Thread
 {
 protected:
     typedef CPU::Context Context;
-public:
 
-    typedef Ordered_List<Thread> Ready_Queue;
+public:
+    typedef Ordered_List<Thread> Ordered_Queue;
 
     // Thread State
-    enum State {
+    enum State
+    {
         RUNNING,
         READY,
-        FINISHING
+        FINISHING,
+        SUSPENDED
     };
 
     /*
      * Construtor vazio. Necessário para inicialização, mas sem importância para a execução das Threads.
      */
-    Thread() { }
+    Thread() {}
 
     /*
      * Cria uma Thread passando um ponteiro para a função a ser executada
@@ -66,34 +68,50 @@ public:
 
     /*
      * NOVO MÉTODO DESTE TRABALHO.
-     * Daspachante (disptacher) de threads. 
+     * Daspachante (disptacher) de threads.
      * Executa enquanto houverem threads do usuário.
      * Chama o escalonador para definir a próxima tarefa a ser executada.
      */
-    static void dispatcher(); 
+    static void dispatcher();
 
     /*
      * NOVO MÉTODO DESTE TRABALHO.
      * Realiza a inicialização da class Thread.
      * Cria as Threads main e dispatcher.
-     */ 
+     */
     static void init(void (*main)(void *));
 
     /*
      * Devolve o processador para a thread dispatcher que irá escolher outra thread pronta
      * para ser executada.
      */
-    static void yield(); 
+    static void yield();
 
     /*
      * Destrutor de uma thread. Realiza todo os procedimentos para manter a consistência da classe.
-     */ 
+     */
     ~Thread();
 
     /*
      * Retorna o contexto da thread.
      */
     Context *context() { return this->_context; }
+
+    /*
+     * Este método suspende a thread em execução até que a thread “alvo” finalize.
+     * O inteiro retornado por join() é o argumento recebido por thread_exit(), ou seja, exit_code.
+     */
+    int join();
+
+    /*
+     * Suspende a Thread até que resume() seja chamado.
+     */
+    void suspend();
+
+    /*
+     * Coloca uma Thread que estava suspensa de volta para a fila de prontos.
+     */
+    void resume();
 
 private:
     int _id;
@@ -103,12 +121,14 @@ private:
     static Thread _main;
     static CPU::Context _main_context;
     static Thread _dispatcher;
-    static Ready_Queue _ready;
-    Ready_Queue::Element _link;
+    static Ordered_Queue _ready;
+    Ordered_Queue::Element _link;
     volatile State _state;
 
     // Atributos adcionados:
     static int _id_counter;
+    int _exit_code;
+    static Ordered_Queue _suspended_queue;
 };
 
 template <typename... Tn>
@@ -121,7 +141,7 @@ Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::durati
     {
         this->_id = _id_counter++;
 
-        if (this->_id != 0)  // A thread main não deve ser inserida na fila de prontos
+        if (this->_id != 0) // A thread main não deve ser inserida na fila de prontos
         {
             this->_state = READY;
             _ready.insert(&_link);

@@ -5,7 +5,7 @@
 #include "traits.h"
 #include "debug.h"
 #include "list.h"
-#include <ctime> 
+#include <ctime>
 #include <chrono>
 
 __BEGIN_API
@@ -27,7 +27,7 @@ public:
 
     /*
      * Construtor vazio. Necessário para inicialização, mas sem importância para a execução das Threads.
-     */ 
+     */
     Thread() { }
 
     /*
@@ -100,7 +100,7 @@ private:
     Context *volatile _context;
     static Thread *_running;
 
-    static Thread _main; 
+    static Thread _main;
     static CPU::Context _main_context;
     static Thread _dispatcher;
     static Ready_Queue _ready;

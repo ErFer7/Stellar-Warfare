@@ -38,7 +38,6 @@ public:
     static int switch_context(Context *from, Context *to);
 };
 
-// O construtor com templates não pode ser definido no arquivo de código fonte
 template <typename... Tn>
 CPU::Context::Context(void (*func)(Tn...), Tn... an)
 {

@@ -137,6 +137,7 @@ int Thread::join()
 
     if (this->_state != FINISHING)
     {
+        _suspended_stack.push(_running);
         _running->suspend();
     }
     else
@@ -152,7 +153,6 @@ void Thread::suspend()
 {
     db<Thread>(TRC) << "Thread::suspend called for thread " << this->_id << "\n";
 
-    _suspended_stack.push(_running);
     this->_state = SUSPENDED;
     yield();
 }

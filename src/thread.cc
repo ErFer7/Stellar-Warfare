@@ -10,7 +10,7 @@ Thread::Ordered_Queue Thread::_ready;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
-Thread::Ordered_Queue Thread::_suspended_queue;
+Thread::Stack Thread::_suspended_stack;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
@@ -35,29 +35,23 @@ void Thread::thread_exit(int exit_code)
     this->_state = FINISHING;
     this->_exit_code = exit_code;
 
-    Thread *_main_thread = &_main;
-    int _queue_size = _suspended_queue.size();
+    Thread *waiting = _suspended_stack.top();
+    _suspended_stack.pop();
 
-    for (int i = 0; i < _queue_size; i++)
+    if (waiting)
     {
-        Thread *_resume = _suspended_queue.remove()->object();
-        if (_resume)
+        if (waiting->_id != _main._id)
         {
-            if (_resume == _main_thread)
-            {
-                db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
-                (&_main)->_state = RUNNING;
-                switch_context(this, &_main);
-            }
-            else
-            {
-                _resume->resume();
-            }
-        }
-        else
+            waiting->resume();
+        } else
         {
-            db<Thread>(WRN) << "Thread::thread_exit: tried to resume null thread\n";
+            db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
+            waiting->_state = RUNNING;
+            switch_context(this, waiting);
         }
+    } else
+    {
+        db<Thread>(WRN) << "Thread::thread_exit: tried to resume null thread\n";
     }
 
     yield();
@@ -143,7 +137,6 @@ int Thread::join()
 
     if (this->_state != FINISHING)
     {
-        _suspended_queue.insert(&(_running->_link));
         _running->suspend();
     }
     else
@@ -159,6 +152,7 @@ void Thread::suspend()
 {
     db<Thread>(TRC) << "Thread::suspend called for thread " << this->_id << "\n";
 
+    _suspended_stack.push(_running);
     this->_state = SUSPENDED;
     yield();
 }

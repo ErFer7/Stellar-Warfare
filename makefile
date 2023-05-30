@@ -9,8 +9,8 @@ makedir:
 	mkdir -p bin
 
 .PHONY: main
-main: cpu.o main_class.o main.o debug.o system.o thread.o
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) main_class.o main.o cpu.o debug.o system.o thread.o
+main: cpu.o main_class.o main.o debug.o system.o thread.o semaphore.o
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) main_class.o main.o cpu.o debug.o system.o thread.o semaphore.o
 
 cpu.o: src/cpu.cc src/traits.h src/cpu.h
 	$(CC) $(CFLAGS) -c src/cpu.cc 
@@ -18,7 +18,7 @@ cpu.o: src/cpu.cc src/traits.h src/cpu.h
 main_class.o: src/main_class.cc src/main_class.h src/cpu.h src/traits.h
 	$(CC) $(CFLAGS) -c src/main_class.cc
 
-main.o: src/main.cc src/main_class.h src/cpu.h src/system.h
+main.o: src/main.cc src/main_class.h src/cpu.h src/system.h src/semaphore.h
 	$(CC) $(CFLAGS) -c src/main.cc 
 
 debug.o: src/debug.cc src/debug.h src/traits.h
@@ -29,6 +29,9 @@ system.o: src/system.cc src/traits.h
 
 thread.o: src/thread.cc src/thread.h src/traits.h
 	$(CC) $(CFLAGS) -c src/thread.cc
+	
+semaphore.o: src/semaphore.cc src/semaphore.h src/traits.h
+	$(CC) $(CFLAGS) -c src/semaphore.cc
 
 clean:
 	rm -f *.o bin/INE5412_OS

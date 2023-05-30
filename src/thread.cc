@@ -35,24 +35,30 @@ void Thread::thread_exit(int exit_code)
     this->_state = FINISHING;
     this->_exit_code = exit_code;
 
-    Thread *waiting = _suspended;
-    _suspended = nullptr;
+    bool main_is_witing = false;
 
-    if (waiting)
+    for (unsigned int i = 0; i < this->_suspended_queue.size(); i++)
     {
-        if (waiting->id() != _main.id())
+        Thread *waiting = this->_suspended_queue.remove()->object();
+
+        if (waiting)
         {
-            waiting->resume();
+            if (waiting->id() != _main.id())
+            {
+                main_is_witing = true;
+            }
+            else
+            {
+                waiting->resume();
+            }
         }
-        else
-        {
-            db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
-            waiting->_state = RUNNING;
-            switch_context(this, waiting);
-        }
-    } else
+    }
+
+    if (main_is_witing)
     {
-        db<Thread>(WRN) << "Thread::thread_exit: tried to resume null thread\n";
+        db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
+        _main._state = RUNNING;
+        switch_context(this, &_main);
     }
 
     yield();
@@ -142,7 +148,7 @@ int Thread::join()
 
     if (this->_state != FINISHING)
     {
-        _suspended = _running;
+        this->_suspended_queue.insert(&_running->_link);
         _running->suspend();
     }
     else
@@ -183,6 +189,22 @@ void Thread::resume()
     {
         db<Thread>(WRN) << "Thread::resume: thread " << this->id() << " is not suspended\n";
     }
+}
+
+Thread *Thread::sleep()
+{
+    db<Thread>(TRC) << "Thread::sleep called for thread " << _running->id() << "\n";
+
+    _running->_state = WAITING;
+    return _running;
+}
+
+void Thread::wakeup(Thread *next)
+{
+    db<Thread>(TRC) << "Thread::wakeup called for thread " << next->id() << "\n";
+
+    next->_state = READY;
+    _ready.insert(&(next->_link));
 }
 
 __END_API

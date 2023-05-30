@@ -24,7 +24,8 @@ public:
         RUNNING,
         READY,
         FINISHING,
-        SUSPENDED
+        SUSPENDED,
+        WAITING
     };
 
     /*
@@ -113,6 +114,21 @@ public:
      */
     void resume();
 
+    /*
+     * Coloca uma Thread para esperar até que o semáforo seja liberado.
+     */
+    static Thread *sleep();
+
+    /*
+     * Acorda uma Thread que esteva esperando o semáforo.
+     */
+    static void wakeup(Thread *next);
+
+    /*
+     * Retorna o _link de uma thread.
+     */
+    Ordered_Queue::Element *get_link() { return &(this->_link); }
+
 private:
     int _id;
     Context *volatile _context;
@@ -129,6 +145,7 @@ private:
     static int _id_counter;
     int _exit_code;
     static Thread *_suspended;
+    Ordered_Queue _suspended_queue;
 };
 
 template <typename... Tn>

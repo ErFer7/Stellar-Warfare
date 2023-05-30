@@ -129,6 +129,7 @@ private:
     static int _id_counter;
     int _exit_code;
     static Thread *_suspended;
+    Ordered_Queue _suspended_queue;
 };
 
 template <typename... Tn>

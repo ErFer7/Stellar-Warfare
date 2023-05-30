@@ -35,7 +35,7 @@ void Thread::thread_exit(int exit_code)
     this->_state = FINISHING;
     this->_exit_code = exit_code;
 
-    bool main_is_witing = false;
+    bool main_is_waiting = false;
 
     for (unsigned int i = 0; i < this->_suspended_queue.size(); i++)
     {
@@ -45,7 +45,7 @@ void Thread::thread_exit(int exit_code)
         {
             if (waiting->id() != _main.id())
             {
-                main_is_witing = true;
+                main_is_waiting = true;
             }
             else
             {
@@ -54,7 +54,7 @@ void Thread::thread_exit(int exit_code)
         }
     }
 
-    if (main_is_witing)
+    if (main_is_waiting)
     {
         db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
         _main._state = RUNNING;

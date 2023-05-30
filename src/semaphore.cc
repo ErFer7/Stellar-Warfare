@@ -70,7 +70,6 @@ void Semaphore::wakeup()
     {
         Thread *next = this->sleeping_queue.remove()->object();
         Thread::wakeup(next);
-        Thread::yield();
     }
 }
 
@@ -84,7 +83,6 @@ void Semaphore::wakeup_all()
         Thread *next = this->sleeping_queue.remove()->object();
         Thread::wakeup(next);
     }
-    Thread::yield();
 }
 
 Semaphore::~Semaphore()

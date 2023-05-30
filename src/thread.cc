@@ -10,7 +10,7 @@ Thread::Ordered_Queue Thread::_ready;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
-Thread *Thread::_suspended = nullptr;
+Thread::Ordered_Queue Thread::_suspended_queue;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
@@ -35,30 +35,20 @@ void Thread::thread_exit(int exit_code)
     this->_state = FINISHING;
     this->_exit_code = exit_code;
 
-    bool main_is_witing = false;
+    Thread *_waiting = this->_waiting_join;
 
-    for (unsigned int i = 0; i < this->_suspended_queue.size(); i++)
+    if (_waiting)
     {
-        Thread *waiting = this->_suspended_queue.remove()->object();
-
-        if (waiting)
+        if (_waiting->id() != _main.id())
         {
-            if (waiting->id() != _main.id())
-            {
-                main_is_witing = true;
-            }
-            else
-            {
-                waiting->resume();
-            }
+            _waiting->resume();
         }
-    }
-
-    if (main_is_witing)
-    {
-        db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
-        _main._state = RUNNING;
-        switch_context(this, &_main);
+        else
+        {
+            db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
+            _main._state = RUNNING;
+            switch_context(this, &_main);
+        }
     }
 
     yield();
@@ -148,7 +138,7 @@ int Thread::join()
 
     if (this->_state != FINISHING)
     {
-        this->_suspended_queue.insert(&_running->_link);
+        this->_waiting_join = _running;
         _running->suspend();
     }
     else
@@ -164,15 +154,23 @@ void Thread::suspend()
 {
     db<Thread>(TRC) << "Thread::suspend called for thread " << this->id() << "\n";
 
-    this->_state = SUSPENDED;
-
-    if (this != _running)
+    if (this->_state != SUSPENDED)
     {
-        _ready.remove(this);
+        this->_state = SUSPENDED;
+        _suspended_queue.insert(&this->_link);
+
+        if (this != _running)
+        {
+            _ready.remove(this);
+        }
+        else
+        {
+            yield();
+        }
     }
     else
     {
-        yield();
+        db<Thread>(WRN) << "Thread::suspend: thread " << this->id() << " is already suspended\n";
     }
 }
 
@@ -182,7 +180,8 @@ void Thread::resume()
 
     if (this->_state == SUSPENDED)
     {
-        _ready.insert(&(this->_link));
+        _suspended_queue.remove(&this->_link);
+        _ready.insert(&this->_link);
         this->_state = READY;
     }
     else

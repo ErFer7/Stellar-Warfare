@@ -7,7 +7,6 @@
 #include "list.h"
 #include <ctime>
 #include <chrono>
-#include <stack>
 
 __BEGIN_API
 
@@ -18,7 +17,6 @@ protected:
 
 public:
     typedef Ordered_List<Thread> Ordered_Queue;
-    typedef std::stack<Thread *> Stack;
 
     // Thread State
     enum State
@@ -130,7 +128,7 @@ private:
     // Atributos adcionados:
     static int _id_counter;
     int _exit_code;
-    static Stack _suspended_stack;
+    static Thread *_suspended;
 };
 
 template <typename... Tn>

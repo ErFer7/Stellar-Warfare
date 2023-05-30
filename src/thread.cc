@@ -10,7 +10,7 @@ Thread::Ordered_Queue Thread::_ready;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
-Thread::Stack Thread::_suspended_stack;
+Thread *Thread::_suspended = nullptr;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
@@ -24,26 +24,27 @@ int Thread::switch_context(Thread *prev, Thread *next)
 
     _running = next;
 
-    db<Thread>(INF) << "Thread::switch_context: from =" << prev->_id << " to =" << next->_id << "\n";
+    db<Thread>(INF) << "Thread::switch_context: from =" << prev->id() << " to =" << next->id() << "\n";
     return CPU::switch_context(prev->_context, next->_context);
 }
 
 void Thread::thread_exit(int exit_code)
 {
-    db<Thread>(TRC) << "Thread::thread_exit called by thread" << _running->_id << " with code " << exit_code << "\n";
+    db<Thread>(TRC) << "Thread::thread_exit called by thread" << _running->id() << " with code " << exit_code << "\n";
 
     this->_state = FINISHING;
     this->_exit_code = exit_code;
 
-    Thread *waiting = _suspended_stack.top();
-    _suspended_stack.pop();
+    Thread *waiting = _suspended;
+    _suspended = nullptr;
 
     if (waiting)
     {
-        if (waiting->_id != _main._id)
+        if (waiting->id() != _main.id())
         {
             waiting->resume();
-        } else
+        }
+        else
         {
             db<Thread>(INF) << "Thread::thread_exit: resuming main thread\n";
             waiting->_state = RUNNING;
@@ -64,7 +65,7 @@ void Thread::dispatcher()
     while (_ready.size())
     {
         Thread *next = _ready.remove()->object();
-        db<Thread>(INF) << "Thread::dispatcher: the next thread is " << next->_id << "\n";
+        db<Thread>(INF) << "Thread::dispatcher: the next thread is " << next->id() << "\n";
 
         _dispatcher._state = READY;
         _ready.insert(&_dispatcher._link);
@@ -76,7 +77,7 @@ void Thread::dispatcher()
 
         if (_running->_state == FINISHING)
         {
-            db<Thread>(INF) << "Thread::dispatcher: thread " << _running->_id << " finished\n";
+            db<Thread>(INF) << "Thread::dispatcher: thread " << _running->id() << " finished\n";
             _ready.remove(_running);
         }
     }
@@ -104,25 +105,29 @@ void Thread::init(void (*main)(void *))
 
 void Thread::yield()
 {
-    db<Thread>(TRC) << "Thread::yield called by thread " << _running->_id << "\n";
+    db<Thread>(TRC) << "Thread::yield called by thread " << _running->id() << "\n";
 
     Thread *next = _ready.remove()->object();
 
-    if (_running->_state != FINISHING && _main._id != _running->_id)
+    if (_running->_state == RUNNING)
     {
-        int now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        _running->_link.rank(now);
-        _ready.insert(&_running->_link);
+        if (_main.id() != _running->id())
+        {
+            int now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            _running->_link.rank(now);
+            _ready.insert(&_running->_link);
+        }
+
+        _running->_state = READY;
     }
 
-    _running->_state = READY;
     Thread *_previous = _running;
 
     _running = next;
     _running->_state = RUNNING;
     _ready.remove(_running);
 
-    db<Thread>(INF) << "Thread::yield: switching from " << _previous->_id << " to " << _running->_id << "\n";
+    db<Thread>(INF) << "Thread::yield: switching from " << _previous->id() << " to " << _running->id() << "\n";
     switch_context(_previous, _running);
 }
 
@@ -133,16 +138,16 @@ Thread::~Thread()
 
 int Thread::join()
 {
-    db<Thread>(TRC) << "Thread::join called for thread " << this->_id << "\n";
+    db<Thread>(TRC) << "Thread::join called for thread " << this->id() << "\n";
 
     if (this->_state != FINISHING)
     {
-        _suspended_stack.push(_running);
+        _suspended = _running;
         _running->suspend();
     }
     else
     {
-        db<Thread>(ERR) << "Thread::join: thread " << this->_id << " is already finishing\n";
+        db<Thread>(ERR) << "Thread::join: thread " << this->id() << " is already finishing\n";
         return -1;
     }
 
@@ -151,15 +156,23 @@ int Thread::join()
 
 void Thread::suspend()
 {
-    db<Thread>(TRC) << "Thread::suspend called for thread " << this->_id << "\n";
+    db<Thread>(TRC) << "Thread::suspend called for thread " << this->id() << "\n";
 
     this->_state = SUSPENDED;
-    yield();
+
+    if (this != _running)
+    {
+        _ready.remove(this);
+    }
+    else
+    {
+        yield();
+    }
 }
 
 void Thread::resume()
 {
-    db<Thread>(TRC) << "Thread::resume called for thread " << this->_id << "\n";
+    db<Thread>(TRC) << "Thread::resume called for thread " << this->id() << "\n";
 
     if (this->_state == SUSPENDED)
     {
@@ -168,7 +181,7 @@ void Thread::resume()
     }
     else
     {
-        db<Thread>(WRN) << "Thread::resume: thread " << this->_id << " is not suspended\n";
+        db<Thread>(WRN) << "Thread::resume: thread " << this->id() << " is not suspended\n";
     }
 }
 

@@ -191,4 +191,20 @@ void Thread::resume()
     }
 }
 
+Thread *Thread::sleep()
+{
+    db<Thread>(TRC) << "Thread::sleep called for thread " << _running->id() << "\n";
+
+    _running->_state = WAITING;
+    return _running;
+}
+
+void Thread::wakeup(Thread *next)
+{
+    db<Thread>(TRC) << "Thread::wakeup called for thread " << next->id() << "\n";
+
+    next->_state = READY;
+    _ready.insert(&(next->_link));
+}
+
 __END_API

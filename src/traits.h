@@ -17,6 +17,7 @@ class Debug;
 class Thread;
 class System;
 class Lists;
+class Semaphore;
 
 // declaração da classe Traits
 template <typename T>
@@ -55,6 +56,12 @@ struct Traits<System> : public Traits<void>
 
 template <>
 struct Traits<Lists> : public Traits<void>
+{
+    static const bool debugged = false;
+};
+
+template <>
+struct Traits<Semaphore> : public Traits<void>
 {
     static const bool debugged = false;
 };

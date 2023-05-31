@@ -10,7 +10,7 @@ Thread::Ordered_Queue Thread::_ready;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
-Thread::Ordered_Queue Thread::_suspended_queue;
+Thread::Ordered_Queue Thread::_suspended;
 
 int Thread::switch_context(Thread *prev, Thread *next)
 {
@@ -157,7 +157,7 @@ void Thread::suspend()
     if (this->_state != SUSPENDED)
     {
         this->_state = SUSPENDED;
-        _suspended_queue.insert(&this->_link);
+        _suspended.insert(&this->_link);
 
         if (this != _running)
         {
@@ -180,7 +180,7 @@ void Thread::resume()
 
     if (this->_state == SUSPENDED)
     {
-        _suspended_queue.remove(&this->_link);
+        _suspended.remove(&this->_link);
         _ready.insert(&this->_link);
         this->_state = READY;
     }

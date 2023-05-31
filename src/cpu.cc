@@ -51,28 +51,28 @@ int CPU::finc(volatile int &number)
 {
     db<CPU>(TRC) << "CPU::finc called\n";
 
-    int result;
-    asm volatile("lock xadd %0, %1"
-                 : "=r"(result), "=m"(number)
-                 : "0"(1), "m"(number)
+    int result = 1;
+    asm volatile("lock xadd %0, %2"
+                 : "=a"(result)
+                 : "a"(result), "m"(number)
                  : "memory");
 
     db<CPU>(INF) << "CPU::finc: result =" << result + 1 << "\n";
-    return result + 1;
+    return result;
 }
 
 int CPU::fdec(volatile int &number)
 {
     db<CPU>(TRC) << "CPU::fdec called\n";
 
-    int result;
-    asm volatile("lock xadd %0, %1"
-                 : "=r"(result), "=m"(number)
-                 : "0"(-1), "m"(number)
+    int result = -1;
+    asm volatile("lock xadd %0, %2"
+                 : "=a"(result)
+                 : "a"(result), "m"(number)
                  : "memory");
 
     db<CPU>(INF) << "CPU::fdec: result =" << result - 1 << "\n";
-    return result - 1;
+    return result;
 }
 
 __END_API

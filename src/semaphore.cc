@@ -22,7 +22,7 @@ void Semaphore::p()
 {
     db<Semaphore>(TRC) << "Semaphore::p called\n";
 
-    if (fdec(this->value) < 0)
+    if (fdec(this->value) < 1)
     {
         db<Semaphore>(INF) << "Semaphore::p: semaphore access denied\n";
         sleep();
@@ -35,7 +35,7 @@ void Semaphore::v()
 {
     db<Semaphore>(TRC) << "Semaphore::v called\n";
 
-    if (finc(this->value) < 1)
+    if (finc(this->value) < 0)
     {
         wakeup();
     }
@@ -72,6 +72,7 @@ void Semaphore::wakeup_all()
         Thread *next = this->sleeping_queue.remove()->object();
         Thread::wakeup(next);
     }
+    Thread::yield();
 }
 
 Semaphore::~Semaphore()

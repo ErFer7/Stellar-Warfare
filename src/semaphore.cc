@@ -35,8 +35,10 @@ void Semaphore::v()
 {
     db<Semaphore>(TRC) << "Semaphore::v called\n";
 
-    finc(this->value);
-    wakeup();
+    if (finc(this->value) < 1)
+    {
+        wakeup();
+    }
 }
 
 void Semaphore::sleep()
@@ -56,6 +58,7 @@ void Semaphore::wakeup()
     {
         Thread *next = this->sleeping_queue.remove()->object();
         Thread::wakeup(next);
+        Thread::yield();
     }
 }
 

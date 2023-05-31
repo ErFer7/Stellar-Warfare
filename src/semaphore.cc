@@ -4,32 +4,18 @@
 
 __BEGIN_API
 
-inline int Semaphore::finc(volatile int &number)
+int Semaphore::finc(volatile int &number)
 {
     db<Semaphore>(TRC) << "Semaphore::finc called\n";
 
-    int result;
-    asm volatile("lock xadd %0, %1"
-                 : "=r"(result), "=m"(number)
-                 : "0"(1), "m"(number)
-                 : "memory");
-
-    db<Semaphore>(INF) << "Semaphore::finc: result =" << result + 1 << "\n";
-    return result + 1;
+    return CPU::finc(number);
 }
 
-inline int Semaphore::fdec(volatile int &number)
+int Semaphore::fdec(volatile int &number)
 {
     db<Semaphore>(TRC) << "Semaphore::fdec called\n";
 
-    int result;
-    asm volatile("lock xadd %0, %1"
-                 : "=r"(result), "=m"(number)
-                 : "0"(-1), "m"(number)
-                 : "memory");
-
-    db<Semaphore>(INF) << "Semaphore::fdec: result =" << result - 1 << "\n";
-    return result - 1;
+    return CPU::fdec(number);
 }
 
 void Semaphore::p()

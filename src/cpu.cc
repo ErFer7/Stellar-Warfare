@@ -47,4 +47,32 @@ int CPU::switch_context(Context *from, Context *to)
     return 0;
 }
 
+int CPU::finc(volatile int &number)
+{
+    db<CPU>(TRC) << "CPU::finc called\n";
+
+    int result;
+    asm volatile("lock xadd %0, %1"
+                 : "=r"(result), "=m"(number)
+                 : "0"(1), "m"(number)
+                 : "memory");
+
+    db<CPU>(INF) << "CPU::finc: result =" << result + 1 << "\n";
+    return result + 1;
+}
+
+int CPU::fdec(volatile int &number)
+{
+    db<CPU>(TRC) << "CPU::fdec called\n";
+
+    int result;
+    asm volatile("lock xadd %0, %1"
+                 : "=r"(result), "=m"(number)
+                 : "0"(-1), "m"(number)
+                 : "memory");
+
+    db<CPU>(INF) << "CPU::fdec: result =" << result - 1 << "\n";
+    return result - 1;
+}
+
 __END_API

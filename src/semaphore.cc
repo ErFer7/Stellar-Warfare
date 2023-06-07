@@ -4,25 +4,11 @@
 
 __BEGIN_API
 
-int Semaphore::finc(volatile int &number)
-{
-    db<Semaphore>(TRC) << "Semaphore::finc called\n";
-
-    return CPU::finc(number);
-}
-
-int Semaphore::fdec(volatile int &number)
-{
-    db<Semaphore>(TRC) << "Semaphore::fdec called\n";
-
-    return CPU::fdec(number);
-}
-
 void Semaphore::p()
 {
     db<Semaphore>(TRC) << "Semaphore::p called\n";
 
-    if (fdec(this->value) < 1)
+    if (CPU::fdec(this->value) < 1)
     {
         db<Semaphore>(INF) << "Semaphore::p: semaphore access denied\n";
         sleep();
@@ -35,7 +21,7 @@ void Semaphore::v()
 {
     db<Semaphore>(TRC) << "Semaphore::v called\n";
 
-    if (finc(this->value) < 0)
+    if (CPU::finc(this->value) < 0)
     {
         wakeup();
     }

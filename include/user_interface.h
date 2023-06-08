@@ -5,10 +5,10 @@
 
 __USING_API
 
-class user_interface {
+class UserInterface {
    public:
-    user_interface();
-    ~user_interface();
+    UserInterface();
+    ~UserInterface();
 
    private:
 };

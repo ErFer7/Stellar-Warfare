@@ -2,10 +2,19 @@
 
 __USING_API
 
-Game::Game() {}
+State _state;
+Input _input;
+Scene _scene;
+UserInterface _userInterface;
+Renderer _renderer;
 
-Game::~Game() {}
+void Game::run() {
+    // Inicializa o jogo
+    _state = State::MENU;
 
-void Game::run() {}
+    // Roda o jogo todo
+
+    // Finaliza o jogo
+}
 
 State Game::get_state() { return this->_state; }

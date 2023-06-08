@@ -1,5 +1,5 @@
-#include "system.h"
-#include "thread.h"
+#include "../include/system.h"
+#include "../include/thread.h"
 
 __BEGIN_API
 

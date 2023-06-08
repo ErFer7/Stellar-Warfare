@@ -2,6 +2,6 @@
 
 __USING_API
 
-user_interface::user_interface() {}
+UserInterface::UserInterface() {}
 
-user_interface::~user_interface() {}
+UserInterface::~UserInterface() {}

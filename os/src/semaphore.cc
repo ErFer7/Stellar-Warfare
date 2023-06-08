@@ -1,6 +1,6 @@
 #include <iostream>
-#include "traits.h"
-#include "semaphore.h"
+#include "../include/traits.h"
+#include "../include/semaphore.h"
 
 __BEGIN_API
 

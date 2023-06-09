@@ -1,5 +1,5 @@
-#include "include/game.h"
-#include "os/include/system.h"
+#include "../include/game.h"
+#include "../os/include/system.h"
 
 __USING_API
 

@@ -4,22 +4,28 @@
 #include <SFML/Graphics.hpp>
 
 #include "../os/include/traits.h"
-#include "include/input.h"
-#include "include/renderer.h"
-#include "include/scene.h"
-#include "include/state.h"
-#include "include/user_interface.h"
+#include "input.h"
+#include "renderer.h"
+#include "scene.h"
+#include "user_interface.h"
 
 __USING_API
 
+class Input;
+class Scene;
+
 class Game {
    public:
+    enum State { MENU, INGAME, PAUSED, GAMEOVER };
+    enum Event { UP, DOWN, LEFT, RIGHT, SHOOT, PAUSE, QUIT, RESTART, PLAYER_DEATH };
+
     Game() {}
     ~Game() {}
     static void init();
     static void run();
     static void free();
-    State get_state();
+    static void send_event(Event event);
+    static State get_state();
     static sf::RenderWindow *get_window();
 
    private:

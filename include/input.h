@@ -3,15 +3,22 @@
 
 #include "../os/include/traits.h"
 #include "../os/include/thread.h"
+#include "include/game.h"
 
 __USING_API
 
-class Input : public Thread {
+class Input {
    public:
-    Input();
+    Input(Game *game);
     ~Input();
 
    private:
+    static void RunDetection(Input *input);
+
+   private:
+    Thread *_thread;
+    Game *_game;
+
 };
 
 #endif

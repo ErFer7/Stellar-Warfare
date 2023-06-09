@@ -1,44 +1,48 @@
 CC = g++
 CFLAGS = -Wall -g
 OS_SRC = os/src
-OS_INCLUDE = os/include
+OS_LIB = os/include
+GAME_SRC = src
+GAME_LIB = include
+OBJ_DIR = obj
+SRC := $(wildcard $(OS_SRC)/*.cc)
+OBJ := $(patsubst $(OS_SRC)/%,$(OBJ_DIR)/%,$(SRC:.cc=.o))
+COMPILE_OBJ = $(CC) $(CFLAGS) -c $< -o $@
 
 EXECUTABLE = "bin/Spaceship game"
 
 .PHONY: default
-default: makedir main cleanobj
+default: makedir main
 
 makedir:
 	mkdir -p bin
+	mkdir -p $(OBJ_DIR)
 
-main: cpu.o main_class.o main.o debug.o system.o thread.o semaphore.o
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) main_class.o main.o cpu.o debug.o system.o thread.o semaphore.o
+main: $(OBJ)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJ)
 
-cpu.o: $(OS_SRC)/cpu.cc $(OS_INCLUDE)/cpu.h $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/cpu.cc 
+$(OBJ_DIR)/cpu.o: $(OS_SRC)/cpu.cc $(OS_LIB)/cpu.h $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 
-main_class.o: $(OS_SRC)/main_class.cc $(OS_INCLUDE)/main_class.h $(OS_INCLUDE)/cpu.h $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/main_class.cc
+$(OBJ_DIR)/main_class.o: $(OS_SRC)/main_class.cc $(OS_LIB)/main_class.h $(OS_LIB)/cpu.h $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 
-main.o: $(OS_SRC)/main.cc $(OS_INCLUDE)/main_class.h $(OS_INCLUDE)/cpu.h $(OS_INCLUDE)/system.h $(OS_INCLUDE)/semaphore.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/main.cc 
+$(OBJ_DIR)/main.o: $(OS_SRC)/main.cc $(OS_LIB)/main_class.h $(OS_LIB)/cpu.h $(OS_LIB)/system.h $(OS_LIB)/semaphore.h
+	$(COMPILE_OBJ)
 
-debug.o: $(OS_SRC)/debug.cc $(OS_INCLUDE)/debug.h $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/debug.cc
+$(OBJ_DIR)/debug.o: $(OS_SRC)/debug.cc $(OS_LIB)/debug.h $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 
-system.o: $(OS_SRC)/system.cc $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/system.cc
+$(OBJ_DIR)/system.o: $(OS_SRC)/system.cc $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 
-thread.o: $(OS_SRC)/thread.cc $(OS_INCLUDE)/thread.h $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/thread.cc
+$(OBJ_DIR)/thread.o: $(OS_SRC)/thread.cc $(OS_LIB)/thread.h $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 	
-semaphore.o: $(OS_SRC)/semaphore.cc $(OS_INCLUDE)/semaphore.h $(OS_INCLUDE)/traits.h
-	$(CC) $(CFLAGS) -c $(OS_SRC)/semaphore.cc
+$(OBJ_DIR)/semaphore.o: $(OS_SRC)/semaphore.cc $(OS_LIB)/semaphore.h $(OS_LIB)/traits.h
+	$(COMPILE_OBJ)
 
 .PHONY: clean
 clean:
-	rm -f *.o "bin/Spaceship game"
+	rm -rf $(OBJ_DIR)/* "bin/Spaceship game"
 
-.PHONY: cleanobj
-cleanobj:
-	rm -f *.o

@@ -1,19 +1,24 @@
 #ifndef scene_h
 #define scene_h
 
-#include "../os/include/traits.h"
 #include "../os/include/thread.h"
+#include "../os/include/traits.h"
+#include "game.h"
 
-__BEGIN_API
+__USING_API
 
-class Scene : public Thread {
+class Scene {
    public:
     Scene();
     ~Scene();
+    void init();
+    void stop();
 
    private:
-};
+    static void UpdateScene();
 
-__END_API
+   private:
+    Thread *_thread;
+};
 
 #endif

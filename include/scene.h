@@ -13,9 +13,10 @@ class Scene {
     ~Scene();
     void init();
     void stop();
+    inline Thread *get_thread() { return this->_thread; }
 
    private:
-    static void UpdateScene();
+    static void update_scene(Scene *scene);
 
    private:
     Thread *_thread;

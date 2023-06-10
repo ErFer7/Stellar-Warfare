@@ -13,6 +13,7 @@ __USING_API
 
 class Input;
 class Scene;
+class Renderer;
 
 class Game {
    public:

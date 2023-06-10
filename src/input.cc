@@ -1,24 +1,22 @@
-#include <iostream>
-
 #include "../include/input.h"
+
+#include <iostream>
 
 __USING_API
 
-Input::Input() {
-    this->_thread = nullptr;
+Input::Input() { this->_thread = nullptr; }
+
+Input::~Input() {
+    if (!this->_thread) {
+        delete this->_thread;
+    }
 }
 
-Input::~Input() { delete this->_thread; }
+void Input::init() { this->_thread = new Thread(update_detection, this); }
 
-void Input::init() {
-    this->_thread = new Thread(UpdateDetection, this);
-}
+void Input::stop() { this->_thread->join(); }
 
-void Input::stop() {
-    this->_thread->join();
-}
-
-void Input::UpdateDetection(Input *input) {
+void Input::update_detection(Input *input) {
     sf::RenderWindow *window = Game::get_window();
 
     while (window->isOpen()) {
@@ -61,4 +59,6 @@ void Input::UpdateDetection(Input *input) {
 
         Thread::yield();
     }
+
+    input->get_thread()->thread_exit(0);
 }

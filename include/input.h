@@ -13,9 +13,10 @@ class Input {
     ~Input();
     void init();
     void stop();
+    inline Thread *get_thread() { return this->_thread; }
 
    private:
-    static void UpdateDetection(Input *input);
+    static void update_detection(Input *input);
 
    private:
     Thread *_thread;

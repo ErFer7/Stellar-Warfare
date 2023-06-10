@@ -19,6 +19,7 @@ void Renderer::render(Renderer *renderer) {
 
     while (window->isOpen()) {
         window->clear();
+        window->display();
         Thread::yield();
     }
 

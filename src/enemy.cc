@@ -2,6 +2,6 @@
 
 __USING_API
 
-Enemy::Enemy() {}
+Enemy::Enemy(int x, int y, float rotation, sf::Texture *texture) : Spaceship(x, y, rotation, texture) {}
 
 Enemy::~Enemy() {}

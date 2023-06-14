@@ -3,12 +3,14 @@
 
 #include "../os/include/thread.h"
 #include "../os/include/traits.h"
+#include "entity.h"
 
 __USING_API
 
-class Spaceship : public Thread {
+class Spaceship : public Entity {
    public:
-    Spaceship();
+    Spaceship() {}
+    Spaceship(int x, int y, float rotation, sf::Texture *texture);
     ~Spaceship();
 
    private:

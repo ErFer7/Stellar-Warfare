@@ -8,7 +8,8 @@ __USING_API
 
 class Player : public Spaceship {
    public:
-    Player();
+    Player() {}
+    Player(int x, int y, sf::Texture *texture);
     ~Player();
 
    private:

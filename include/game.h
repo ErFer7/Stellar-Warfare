@@ -26,17 +26,18 @@ class Game {
     static void run();
     static void free();
     static void send_event(Event event);
-    static State get_state();
-    static sf::RenderWindow *get_window();
+    static inline State get_state() { return _state; }
+    static inline sf::RenderWindow *get_window() { return &_window; }
+    static inline Scene *get_scene() { return &_scene; }
 
    private:
     // Será que deve ser tudo estático?
+    static sf::RenderWindow _window;
     static State _state;
     static Input _input;
     static Scene _scene;
-    static UserInterface _user_interface;
     static Renderer _renderer;
-    static sf::RenderWindow _window;
+    static UserInterface _user_interface;
 };
 
 #endif

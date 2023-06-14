@@ -19,11 +19,13 @@ sf::RenderWindow Game::_window;
 
 void Game::init() {
     _state = Game::State::MENU;
-    new (&_window) sf::RenderWindow(sf::VideoMode(800, 600), "SFML works!");
+    new (&_window) sf::RenderWindow(sf::VideoMode(1024, 768), "INE5412 Game");  // TODO: Conferir se a resolução é boa
     _window.setKeyRepeatEnabled(false);
+    _window.setFramerateLimit(60);
 
     _input.init();
     _scene.init();
+    _renderer.init();
 }
 
 void Game::run() {
@@ -49,7 +51,3 @@ void Game::send_event(Event event) {
             break;
     }
 }
-
-Game::State Game::get_state() { return _state; }
-
-sf::RenderWindow *Game::get_window() { return &_window; }

@@ -8,7 +8,8 @@ __USING_API
 
 class Enemy : public Spaceship {
    public:
-    Enemy();
+    Enemy() {}
+    Enemy(int x, int y, float rotation, sf::Texture *texture);
     ~Enemy();
 
    private:

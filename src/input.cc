@@ -54,6 +54,8 @@ void Input::update_detection(Input *input) {
                         Game::send_event(Game::Event::QUIT);
                     }
                     break;
+                default:
+                    break;
             }
         }
 

@@ -7,8 +7,9 @@ __USING_API
 Input::Input() { this->_thread = nullptr; }
 
 Input::~Input() {
-    if (!this->_thread) {
+    if (this->_thread) {
         delete this->_thread;
+        this->_thread = nullptr;
     }
 }
 
@@ -29,16 +30,16 @@ void Input::update_detection(Input *input) {
                     break;
                 case sf::Event::KeyPressed:
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                        Game::send_event(Game::Event::LEFT);
+                        Game::send_event(Game::Event::LEFT_TURN);
                         std::cout << "Keyboard esquerda!" << std::endl;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                        Game::send_event(Game::Event::RIGHT);
+                        Game::send_event(Game::Event::RIGHT_TURN);
                         std::cout << "Keyboard direita!" << std::endl;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                        Game::send_event(Game::Event::DOWN);
+                        Game::send_event(Game::Event::BACKWARD);
                         std::cout << "Keyboard para baixo!" << std::endl;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                        Game::send_event(Game::Event::UP);
+                        Game::send_event(Game::Event::FORWARD);
                         std::cout << "Keyboard para cima!" << std::endl;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
                         Game::send_event(Game::Event::SHOOT);

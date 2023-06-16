@@ -2,24 +2,42 @@
 
 __USING_API
 
-Scene::Scene() { this->_thread = nullptr; }
+Scene::Scene() {
+    this->_thread = nullptr;
+    this->_entities_color = sf::Color(15, 45, 15, 255);
+    this->_entities_scale = 24.0f;
+    this->_space_matrix = nullptr;
+    this->_player = nullptr;
+}
 
 Scene::~Scene() {
-    if (!this->_thread) {
+    if (this->_thread) {
         delete this->_thread;
+        this->_thread = nullptr;
+    }
+
+    if (this->_space_matrix) {
+        delete this->_space_matrix;
+        this->_space_matrix = nullptr;
+    }
+
+    if (this->_player) {
+        delete this->_player;
+        this->_player = nullptr;
     }
 }
 
 void Scene::init() {
     this->_thread = new Thread(update_scene, this);
+    this->_space_matrix = new Matrix<Entity::Type>(10, 10, Entity::Type::VOID);
 
     // TODO: Checar erros
     this->_player_texture.loadFromFile("assets/sprites/player.png");
     this->_enemy_texture.loadFromFile("assets/sprites/enemy.png");
     this->_bullet_texture.loadFromFile("assets/sprites/bullet.png");
 
-    this->_enemies = std::vector<Enemy*>();
-    this->_bullets = std::vector<Bullet*>();
+    this->_enemies = std::vector<Enemy *>();
+    this->_bullets = std::vector<Bullet *>();
 
     this->create_player();
 
@@ -41,7 +59,7 @@ void Scene::update_scene(Scene *scene) {
 }
 
 void Scene::create_player() {
-    this->_player = Player(0, 0, &this->_player_texture);
+    this->_player = new Player(0, 0, &this->_player_texture, this->_entities_color, this->_entities_scale, 0.0f);
 }
 
 void Scene::create_enemy() {
@@ -53,7 +71,7 @@ void Scene::create_bullet() {
 }
 
 void Scene::render(sf::RenderWindow *window) {
-    this->_player.render(window);
+    this->_player->render(window);
 
     // TODO: Verificar o caso em que alguma entidade é destruída enquanto a renderização acontece
     for (size_t i = 0; i < this->_enemies.size(); i++) {

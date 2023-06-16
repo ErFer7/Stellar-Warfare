@@ -190,20 +190,33 @@ void Thread::resume()
     }
 }
 
-Thread *Thread::sleep()
+void Thread::sleep(Ordered_Queue *sleeping_queue)
 {
     db<Thread>(TRC) << "Thread::sleep called for thread " << _running->id() << "\n";
 
     _running->_state = WAITING;
-    return _running;
+    sleeping_queue->insert(&_running->_link);
+    yield();
 }
 
-void Thread::wakeup(Thread *next)
+void Thread::wakeup(Ordered_Queue *sleeping_queue)
 {
-    db<Thread>(TRC) << "Thread::wakeup called for thread " << next->id() << "\n";
+    db<Thread>(TRC) << "Thread::wakeup called \n";
 
-    next->_state = READY;
-    _ready.insert(&(next->_link));
+    if (!sleeping_queue->empty())
+    {
+        Thread *next = sleeping_queue->remove()->object();
+        if (next != nullptr)
+        {
+            next->_state = READY;
+            _ready.insert(&(next->_link));
+            yield();
+        }
+        else
+        {
+            db<Thread>(WRN) << "Thread::wakeup: next thread has been deleted\n";
+        }
+    }
 }
 
 __END_API

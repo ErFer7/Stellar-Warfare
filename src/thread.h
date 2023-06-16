@@ -117,12 +117,12 @@ public:
     /*
      * Coloca uma Thread para esperar até que o semáforo seja liberado.
      */
-    static Thread *sleep();
+    static void sleep(Ordered_Queue *sleeping_queue);
 
     /*
      * Acorda uma Thread que esteva esperando o semáforo.
      */
-    static void wakeup(Thread *next);
+    static void wakeup(Ordered_Queue *sleeping_queue);
 
     /*
      * Retorna o _link de uma thread.
@@ -145,7 +145,7 @@ private:
     static int _id_counter;
     int _exit_code;
     static Ordered_Queue _suspended;
-    Thread* _waiting_join;
+    Thread *_waiting_join;
 };
 
 template <typename... Tn>

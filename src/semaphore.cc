@@ -31,21 +31,14 @@ void Semaphore::sleep()
 {
     db<Semaphore>(TRC) << "Semaphore::sleep called\n";
 
-    Thread *to_sleep = Thread::sleep();
-    this->sleeping_queue.insert(to_sleep->get_link());
-    Thread::yield();
+    Thread::sleep(&sleeping_queue);
 }
 
 void Semaphore::wakeup()
 {
     db<Semaphore>(TRC) << "Semaphore::wakeup called\n";
 
-    if (!this->sleeping_queue.empty())
-    {
-        Thread *next = this->sleeping_queue.remove()->object();
-        Thread::wakeup(next);
-        Thread::yield();
-    }
+    Thread::wakeup(&sleeping_queue);
 }
 
 void Semaphore::wakeup_all()
@@ -55,8 +48,7 @@ void Semaphore::wakeup_all()
     int queue_size = this->sleeping_queue.size();
     for (int i = 0; i < queue_size; i++)
     {
-        Thread *next = this->sleeping_queue.remove()->object();
-        Thread::wakeup(next);
+        Thread::wakeup(&sleeping_queue);
     }
     Thread::yield();
 }

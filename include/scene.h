@@ -8,6 +8,7 @@
 #include "bullet.h"
 #include "enemy.h"
 #include "game.h"
+#include "matrix.h"
 #include "player.h"
 
 __USING_API
@@ -31,12 +32,16 @@ class Scene {
    private:
     Thread *_thread;
     // TODO: Decidir se as texturas ficam aqui mesmo. Atualmente estão aqui por motivos de serialização
+    // TODO: Alocar as texturas no heap ou na stack?
     sf::Texture _player_texture;
     sf::Texture _enemy_texture;
     sf::Texture _bullet_texture;
-    Player _player;
-    std::vector<Enemy*> _enemies;
-    std::vector<Bullet*> _bullets;
+    Player *_player;
+    std::vector<Enemy *> _enemies;
+    std::vector<Bullet *> _bullets;
+    sf::Color _entities_color;
+    float _entities_scale;
+    Matrix<Entity::Type> *_space_matrix;
 };
 
 #endif

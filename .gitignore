@@ -35,3 +35,4 @@ debug/
 obj/
 Grupo_H.zip
 .vscode
+.valgrind

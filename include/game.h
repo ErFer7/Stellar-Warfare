@@ -18,7 +18,7 @@ class Renderer;
 class Game {
    public:
     enum State { MENU, INGAME, PAUSED, GAMEOVER };
-    enum Event { UP, DOWN, LEFT, RIGHT, SHOOT, PAUSE, QUIT, RESTART, PLAYER_DEATH };
+    enum Event { FORWARD, BACKWARD, LEFT_TURN, RIGHT_TURN, SHOOT, PAUSE, QUIT, RESTART, PLAYER_DEATH };
 
     Game() {}
     ~Game() {}
@@ -31,7 +31,8 @@ class Game {
     static inline Scene *get_scene() { return &_scene; }
 
    private:
-    // Será que deve ser tudo estático?
+    // TODO: Será que deve ser tudo estático?
+    // TODO: Deveria ser alocado no heap ou na stack?
     static sf::RenderWindow _window;
     static State _state;
     static Input _input;

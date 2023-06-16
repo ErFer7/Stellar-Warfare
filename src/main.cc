@@ -1,10 +1,10 @@
-#include "thread.h"
-#include "system.h"
-#include "main_class.h"
+#include "../include/game.h"
+#include "../os/include/system.h"
 
-__USING_API 
+__USING_API
 
-int main(void)
-{
-    System::init(&Main::run);
+int main(void) {
+    System::init((void (*)(void *)) & Game::run);
+
+    return 0;
 }

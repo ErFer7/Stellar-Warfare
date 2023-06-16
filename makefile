@@ -1,37 +1,37 @@
 CC = g++
-CFLAGS = -Wall -g
+LDLIBS = -lsfml-graphics -lsfml-window -lsfml-system -lm -lpng
+CFLAGS = -g -Wall
+OS_SRC_DIR = os/src
+OS_LIB_DIR = os/include
+GAME_SRC_DIR = src
+GAME_LIB_DIR = include
+OBJ_DIR = obj
+LIB = $(wildcard $(OS_LIB_DIR)/*.h) $(wildcard $(GAME_LIB_DIR)/*.h)
+OS_SRC := $(wildcard $(OS_SRC_DIR)/*.cc)
+GAME_SRC := $(wildcard $(GAME_SRC_DIR)/*.cc)
+OBJ := $(patsubst $(OS_SRC_DIR)/%, $(OBJ_DIR)/%,$(OS_SRC:.cc=.o)) $(patsubst $(GAME_SRC_DIR)/%, $(OBJ_DIR)/%,$(GAME_SRC:.cc=.o))
+COMPILE_OBJ = $(CC) $(CFLAGS) -c $< -o $@
 
-EXECUTABLE = bin/INE5412_OS
+EXECUTABLE = "bin/Spaceship game"
 
+.PHONY: default
 default: makedir main
 
 makedir:
 	mkdir -p bin
+	mkdir -p $(OBJ_DIR)
 
-.PHONY: main
-main: cpu.o main_class.o main.o debug.o system.o thread.o semaphore.o
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) main_class.o main.o cpu.o debug.o system.o thread.o semaphore.o
+main: $(OBJ)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJ) $(LDLIBS)
 
-cpu.o: src/cpu.cc src/traits.h src/cpu.h
-	$(CC) $(CFLAGS) -c src/cpu.cc 
+# OS
+$(OBJ_DIR)/%.o: $(OS_SRC_DIR)/%.cc $(LIB)
+	$(COMPILE_OBJ)
 
-main_class.o: src/main_class.cc src/main_class.h src/cpu.h src/traits.h
-	$(CC) $(CFLAGS) -c src/main_class.cc
+# Game
+$(OBJ_DIR)/%.o: $(GAME_SRC_DIR)/%.cc $(LIB)
+	$(COMPILE_OBJ)
 
-main.o: src/main.cc src/main_class.h src/cpu.h src/system.h src/semaphore.h
-	$(CC) $(CFLAGS) -c src/main.cc 
-
-debug.o: src/debug.cc src/debug.h src/traits.h
-	$(CC) $(CFLAGS) -c src/debug.cc
-
-system.o: src/system.cc src/traits.h
-	$(CC) $(CFLAGS) -c src/system.cc
-
-thread.o: src/thread.cc src/thread.h src/traits.h
-	$(CC) $(CFLAGS) -c src/thread.cc
-	
-semaphore.o: src/semaphore.cc src/semaphore.h src/traits.h
-	$(CC) $(CFLAGS) -c src/semaphore.cc
-
+.PHONY: clean
 clean:
-	rm -f *.o bin/INE5412_OS
+	rm -rf $(OBJ_DIR)/* "bin/Spaceship game"

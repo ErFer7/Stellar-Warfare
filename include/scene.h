@@ -10,18 +10,20 @@
 #include "game.h"
 #include "matrix.h"
 #include "player.h"
+#include "thread_container.h"
 
 __USING_API
 
-class Scene {
+class Scene final : public ThreadContainer {
    public:
-    Scene();
+    Scene(sf::Color entities_color, int entities_scale, int width, int height);
     ~Scene();
     void init();
-    void stop();
-    // TODO: Decidir se deve-se usar inline
-    inline Thread *get_thread() { return this->_thread; }
     void render(sf::RenderWindow *window);
+    void handle_player_control_event(StateMachine::Event event);
+    inline Player *get_player() { return this->_player; }
+    inline std::vector<Enemy *> *get_enemies() { return &this->_enemies; }
+    inline std::vector<Bullet *> *get_bullets() { return &this->_bullets; }
 
    private:
     static void update_scene(Scene *scene);
@@ -30,7 +32,6 @@ class Scene {
     void create_bullet();
 
    private:
-    Thread *_thread;
     // TODO: Decidir se as texturas ficam aqui mesmo. Atualmente estão aqui por motivos de serialização
     // TODO: Alocar as texturas no heap ou na stack?
     sf::Texture _player_texture;
@@ -40,7 +41,7 @@ class Scene {
     std::vector<Enemy *> _enemies;
     std::vector<Bullet *> _bullets;
     sf::Color _entities_color;
-    float _entities_scale;
+    int _entities_scale;
     Matrix<Entity::Type> *_space_matrix;
 };
 

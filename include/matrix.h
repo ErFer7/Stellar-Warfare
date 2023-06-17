@@ -47,6 +47,31 @@ class Matrix {
         }
     }
 
+    void rotate(bool clockwise) {
+        T* new_matrix = new T[get_width() * get_height()];
+
+        if (clockwise) {
+            for (int i = 0; i < get_width(); i++) {
+                for (int j = 0; j < get_height(); j++) {
+                    new_matrix[i * get_height() + j] = this->_matrix[(get_height() - j - 1) * get_width() + i];
+                }
+            }
+        } else {
+            for (int i = 0; i < get_width(); i++) {
+                for (int j = 0; j < get_height(); j++) {
+                    new_matrix[i * get_height() + j] = this->_matrix[j * get_width() + (get_width() - i - 1)];
+                }
+            }
+        }
+
+        delete[] this->_matrix;
+        this->_matrix = new_matrix;
+
+        int temp = this->_width;
+        this->_width = this->_height;
+        this->_height = temp;
+    }
+
     inline int get_width() { return this->_width; };
     inline int get_height() { return this->_height; };
 

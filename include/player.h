@@ -4,21 +4,22 @@
 #include "../os/include/traits.h"
 #include "../os/include/semaphore.h"
 #include "spaceship.h"
-// #include "game.h"
+#include "state_machine.h"
 
 __USING_API
 
-class Player : public Spaceship {
+class Player final : public Spaceship {
    public:
-    Player() {}
-    Player(int x, int y, sf::Texture *texture, sf::Color color, float scale, float speed);
+    Player() { this->_event_sem = nullptr; }
+    Player(int x, int y, sf::Texture *texture, sf::Color color, float scale);
     ~Player();
+    void init() final;
     static void update_behaviour(Player *player);
+    void set_control_event(StateMachine::Event event);
 
    private:
-   //  Game::Event _current_event;  // TODO: Fix circular dependency
-    // TODO: Deveria ser alocaod no heap?
-    Semaphore _event_sem;
+    StateMachine::Event _current_event;
+    Semaphore *_event_sem;
 };
 
 #endif

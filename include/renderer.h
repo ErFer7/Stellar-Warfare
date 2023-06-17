@@ -1,26 +1,23 @@
 #ifndef renderer_h
 #define renderer_h
 
-#include "../os/include/thread.h"
 #include "../os/include/traits.h"
 #include "game.h"
+#include "thread_container.h"
 
 __USING_API
 
-class Renderer : public Thread {
+class Renderer final : public ThreadContainer {
    public:
-    Renderer();
-    ~Renderer();
-    void init();
-    void stop();
-    inline Thread *get_thread() { return this->_thread; }
+    Renderer(sf::Color background_color);
+    ~Renderer() {}
+    void init() final;
     inline sf::Color get_background_color() { return this->_background_color; }
 
    private:
     static void render(Renderer *renderer);
 
    private:
-    Thread *_thread;
     sf::Color _background_color;
 };
 

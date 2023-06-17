@@ -4,55 +4,43 @@
 
 __USING_API
 
-Input::Input() { this->_thread = nullptr; }
-
-Input::~Input() {
-    if (this->_thread) {
-        delete this->_thread;
-        this->_thread = nullptr;
-    }
-}
-
-void Input::init() { this->_thread = new Thread(update_detection, this); }
-
-void Input::stop() { this->_thread->join(); }
+void Input::init() { this->thread = new Thread(update_detection, this); }
 
 void Input::update_detection(Input *input) {
     sf::RenderWindow *window = Game::get_window();
 
-    while (window->isOpen()) {
+    while (true) {
+        Game::lock_state();
+        if (Game::get_state() == StateMachine::State::EXIT) {
+            Game::unlock_state();
+            break;
+        }
+        Game::unlock_state();
+
         sf::Event event;
 
         while (window->pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
-                    Game::send_event(Game::Event::QUIT);
+                    Game::handle_event(StateMachine::Event::QUIT);
                     break;
                 case sf::Event::KeyPressed:
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                        Game::send_event(Game::Event::LEFT_TURN);
-                        std::cout << "Keyboard esquerda!" << std::endl;
+                        Game::handle_event(StateMachine::Event::LEFT_TURN);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                        Game::send_event(Game::Event::RIGHT_TURN);
-                        std::cout << "Keyboard direita!" << std::endl;
+                        Game::handle_event(StateMachine::Event::RIGHT_TURN);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                        Game::send_event(Game::Event::BACKWARD);
-                        std::cout << "Keyboard para baixo!" << std::endl;
+                        Game::handle_event(StateMachine::Event::BACKWARD);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                        Game::send_event(Game::Event::FORWARD);
-                        std::cout << "Keyboard para cima!" << std::endl;
+                        Game::handle_event(StateMachine::Event::FORWARD);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-                        Game::send_event(Game::Event::SHOOT);
-                        std::cout << "Keyboard pressed = " << event.key.code << std::endl;
+                        Game::handle_event(StateMachine::Event::SHOOT);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-                        std::cout << "Keyboard pressed = " << event.key.code << std::endl;
-                        Game::send_event(Game::Event::PAUSE);
+                        Game::handle_event(StateMachine::Event::PAUSE_TOGGLE);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-                        std::cout << "Keyboard pressed = " << event.key.code << std::endl;
-                        Game::send_event(Game::Event::RESTART);
+                        Game::handle_event(StateMachine::Event::RESTART);
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                        std::cout << "Keyboard pressed = " << event.key.code << std::endl;
-                        Game::send_event(Game::Event::QUIT);
+                        Game::handle_event(StateMachine::Event::QUIT);
                     }
                     break;
                 default:

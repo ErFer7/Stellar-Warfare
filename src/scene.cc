@@ -2,20 +2,21 @@
 
 __USING_API
 
-Scene::Scene() {
-    this->_thread = nullptr;
-    this->_entities_color = sf::Color(15, 45, 15, 255);
-    this->_entities_scale = 24.0f;
-    this->_space_matrix = nullptr;
+Scene::Scene(sf::Color entities_color, int entities_scale, int width, int height) {
+    this->_entities_color = entities_color;
+    this->_entities_scale = entities_scale;
+    this->_space_matrix = new Matrix<Entity::Type>(width, height, Entity::Type::VOID);
     this->_player = nullptr;
+    this->_enemies = std::vector<Enemy *>();
+    this->_bullets = std::vector<Bullet *>();
+
+    // TODO: Checar erros
+    this->_player_texture.loadFromFile("assets/sprites/player.png");
+    this->_enemy_texture.loadFromFile("assets/sprites/enemy.png");
+    this->_bullet_texture.loadFromFile("assets/sprites/bullet.png");
 }
 
 Scene::~Scene() {
-    if (this->_thread) {
-        delete this->_thread;
-        this->_thread = nullptr;
-    }
-
     if (this->_space_matrix) {
         delete this->_space_matrix;
         this->_space_matrix = nullptr;
@@ -28,42 +29,53 @@ Scene::~Scene() {
 }
 
 void Scene::init() {
-    this->_thread = new Thread(update_scene, this);
-    this->_space_matrix = new Matrix<Entity::Type>(10, 10, Entity::Type::VOID);
-
-    // TODO: Checar erros
-    this->_player_texture.loadFromFile("assets/sprites/player.png");
-    this->_enemy_texture.loadFromFile("assets/sprites/enemy.png");
-    this->_bullet_texture.loadFromFile("assets/sprites/bullet.png");
-
-    this->_enemies = std::vector<Enemy *>();
-    this->_bullets = std::vector<Bullet *>();
+    this->thread = new Thread(update_scene, this);
 
     this->create_player();
 
-    for (int i = 0; i < 4; i++) {
-        this->create_enemy();
-    }
+    this->create_enemy();
+
+    // for (int i = 0; i < 4; i++) {
+    //     this->create_enemy();
+    // }
 }
 
-void Scene::stop() { this->_thread->join(); }
-
 void Scene::update_scene(Scene *scene) {
-    sf::RenderWindow *window = Game::get_window();
+    while (true) {
+        Game::lock_state();
+        if (Game::get_state() == StateMachine::State::EXIT) {
+            Game::unlock_state();
+            break;
+        }
+        Game::unlock_state();
 
-    while (window->isOpen()) {
+        Player *player = scene->get_player();
+
+        player->lock_target_move();
+        if (player->has_target_movement()) {
+            
+            // TODO: Obter a intenção do jogador
+        }
+        player->unlock_target_move();
+
+        // TODO: Resolver as colisões
+
         Thread::yield();
     }
+
+    // TODO: Limpar tudo que foi alocado
 
     scene->get_thread()->thread_exit(0);
 }
 
 void Scene::create_player() {
-    this->_player = new Player(0, 0, &this->_player_texture, this->_entities_color, this->_entities_scale, 0.0f);
+    this->_player = new Player(1, 1, &this->_player_texture, this->_entities_color, this->_entities_scale);
+    this->_player->init();
 }
 
 void Scene::create_enemy() {
-    // this->_enemies.push_back(Enemy());
+    this->_enemies.push_back(
+        new Enemy(4, 4, 0, &this->_enemy_texture, this->_entities_color, this->_entities_scale, 0.0f));
 }
 
 void Scene::create_bullet() {
@@ -82,3 +94,5 @@ void Scene::render(sf::RenderWindow *window) {
         this->_bullets.at(i)->render(window);
     }
 }
+
+void Scene::handle_player_control_event(StateMachine::Event event) { this->_player->set_control_event(event); }

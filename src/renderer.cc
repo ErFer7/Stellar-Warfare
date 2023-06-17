@@ -2,26 +2,23 @@
 
 __USING_API
 
-Renderer::Renderer() {
-    this->_thread = nullptr;
-    this->_background_color = sf::Color(155, 188, 15, 255);  // TODO: Talvez seja melhor passar isso como parâmetro
+Renderer::Renderer(sf::Color background_color) {
+    this->_background_color = background_color;
 }
 
-Renderer::~Renderer() {
-    if (this->_thread) {
-        delete this->_thread;
-        this->_thread = nullptr;
-    }
-}
-
-void Renderer::init() { this->_thread = new Thread(render, this); }
-
-void Renderer::stop() { this->_thread->join(); }
+void Renderer::init() { this->thread = new Thread(render, this); }
 
 void Renderer::render(Renderer *renderer) {
     sf::RenderWindow *window = Game::get_window();
 
-    while (window->isOpen()) {
+    while (true) {
+        Game::lock_state();
+        if (Game::get_state() == StateMachine::State::EXIT) {
+            Game::unlock_state();
+            break;
+        }
+        Game::unlock_state();
+
         window->clear(renderer->get_background_color());
 
         Game::get_scene()->render(window);

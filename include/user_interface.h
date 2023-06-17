@@ -5,6 +5,7 @@
 
 __USING_API
 
+// TODO: Ver se isso precisa ser uma thread
 class UserInterface {
    public:
     UserInterface();

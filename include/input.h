@@ -1,25 +1,21 @@
 #ifndef input_h
 #define input_h
 
-#include "../os/include/thread.h"
 #include "../os/include/traits.h"
 #include "game.h"
+#include "state_machine.h"
+#include "thread_container.h"
 
 __USING_API
 
-class Input {
+class Input final : public ThreadContainer {
    public:
-    Input();
-    ~Input();
-    void init();
-    void stop();
-    inline Thread *get_thread() { return this->_thread; }
+    Input() {}
+    ~Input() {}
+    void init() final;
 
    private:
     static void update_detection(Input *input);
-
-   private:
-    Thread *_thread;
 };
 
 #endif

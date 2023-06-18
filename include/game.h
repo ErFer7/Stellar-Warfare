@@ -3,13 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../os/include/traits.h"
 #include "../os/include/semaphore.h"
+#include "../os/include/traits.h"
 #include "input.h"
 #include "renderer.h"
 #include "scene.h"
-#include "user_interface.h"
 #include "state_machine.h"
+#include "user_interface.h"
 
 __USING_API
 
@@ -25,7 +25,6 @@ class Game {
     static void run();
     static void free();
     static void handle_event(StateMachine::Event event);
-    static void set_state(StateMachine::State state);
     static inline StateMachine::State get_state() { return _state; }
     static inline sf::RenderWindow *get_window() { return _window; }
     static inline Scene *get_scene() { return _scene; }
@@ -33,7 +32,7 @@ class Game {
     static inline void unlock_state() { _state_sem->v(); }
 
    private:
-    static StateMachine::State _state;
+    static StateMachine::State _state;  // Compartilhado com o Input (W e R), Scene (R) e Renderer (R) [LOCKED]
     static sf::RenderWindow *_window;
     static Input *_input;
     static Scene *_scene;

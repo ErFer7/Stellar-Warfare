@@ -10,7 +10,6 @@ class ThreadContainer {
    public:
     ThreadContainer();
     ~ThreadContainer();
-    virtual void init() {}
     void join();
     inline Thread *get_thread() { return this->thread; }
 

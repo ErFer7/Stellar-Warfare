@@ -4,13 +4,14 @@
 
 __USING_API
 
-Player::Player(int x, int y, sf::Texture *texture, sf::Color color, float scale)
-    : Spaceship(x, y, 0.0f, texture, color, scale, 0.0f) {
+Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 0.0f) {
     Type shape[] = {VOID, PLAYER, VOID, PLAYER, PLAYER, PLAYER, PLAYER, PLAYER, PLAYER};
 
+    this->set_graphics(texture);
     this->set_shape(3, 3, shape);
     this->_current_event = StateMachine::Event::IDLE;
     this->_event_sem = new Semaphore(1);
+    this->thread = new Thread(this->update_behaviour, this);
 }
 
 Player::~Player() {
@@ -20,10 +21,8 @@ Player::~Player() {
     }
 }
 
-void Player::init() { this->thread = new Thread(this->update_behaviour, this); }
-
 void Player::update_behaviour(Player *player) {
-    while (player->get_health() > 0) {
+    while (!player->is_destroyed()) {
         player->_event_sem->p();
         StateMachine::Event event = player->_current_event;
         player->_current_event = StateMachine::Event::IDLE;
@@ -31,19 +30,19 @@ void Player::update_behaviour(Player *player) {
 
         player->lock_target_move();
         switch (event) {
-            case StateMachine::Event::FORWARD:
-                player->move(1, 0);  // TODD: Trocar por target move
+            case StateMachine::Event::UP:
+                player->set_target_move(1, 0);
                 break;
-            case StateMachine::Event::BACKWARD:
-                player->move(-1, 0);  // TODD: Trocar por target move
+            case StateMachine::Event::DOWN:
+                player->set_target_move(-1, 0);
                 break;
-            case StateMachine::Event::RIGHT_TURN:
-                player->move(0, 90);  // TODD: Trocar por target move
+            case StateMachine::Event::RIGHT:
+                player->set_target_move(0, 90);
                 break;
-            case StateMachine::Event::LEFT_TURN:
-                player->move(0, -90);  // TODD: Trocar por target move
+            case StateMachine::Event::LEFT:
+                player->set_target_move(0, -90);
                 break;
-            case StateMachine::Event::SHOOT:
+            case StateMachine::Event::SPACE:
                 // player->move();
                 break;
             default:

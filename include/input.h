@@ -10,9 +10,8 @@ __USING_API
 
 class Input final : public ThreadContainer {
    public:
-    Input() {}
+    Input();
     ~Input() {}
-    void init() final;
 
    private:
     static void update_detection(Input *input);

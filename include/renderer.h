@@ -9,9 +9,8 @@ __USING_API
 
 class Renderer final : public ThreadContainer {
    public:
-    Renderer(sf::Color background_color);
+    Renderer();
     ~Renderer() {}
-    void init() final;
     inline sf::Color get_background_color() { return this->_background_color; }
 
    private:

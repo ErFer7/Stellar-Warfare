@@ -19,19 +19,15 @@ sf::RenderWindow *Game::_window;
 Semaphore *Game::_state_sem;
 
 void Game::init() {
-    _state = StateMachine::State::MENU;
+    _state = StateMachine::State::NONINITIALIZED;
     _window = new sf::RenderWindow(sf::VideoMode(1024, 768), "INE5412 Game");  // TODO: Conferir se a resolução é boa
     _window->setKeyRepeatEnabled(false);
     _window->setFramerateLimit(60);
     _state_sem = new Semaphore(1);
 
     _input = new Input();
-    _scene = new Scene(sf::Color(15, 45, 15, 255), 24.0f, 10, 10);
-    _renderer = new Renderer(sf::Color(155, 188, 15, 255));
-
-    _input->init();
-    _scene->init();
-    _renderer->init();
+    _scene = new Scene();
+    _renderer = new Renderer();
 }
 
 void Game::run() {
@@ -54,27 +50,37 @@ void Game::free() {
 
 void Game::handle_event(StateMachine::Event event) {
     switch (event) {
-        case StateMachine::Event::PAUSE_TOGGLE:
-            set_state(_state == StateMachine::State::PAUSED ? StateMachine::State::INGAME
-                                                            : StateMachine::State::PAUSED);
+        case StateMachine::Event::P_KEY:
+            lock_state();
+            if (_state == StateMachine::State::NONINITIALIZED) {
+                _state = StateMachine::State::INGAME;
+                _scene->start_game();
+            } else if (_state != StateMachine::State::GAMEOVER) {
+                if (_state == StateMachine::State::PAUSED) {
+                    _state = StateMachine::State::INGAME;
+                } else {
+                    _state = StateMachine::State::PAUSED;
+                }
+            }
+            unlock_state();
             break;
-        case StateMachine::Event::RESTART:
-            set_state(StateMachine::State::INGAME);
+        case StateMachine::Event::R_KEY:
+            lock_state();
+            _state = StateMachine::State::INGAME;
+            unlock_state();
             break;
         case StateMachine::Event::PLAYER_DEATH:
-            set_state(StateMachine::State::GAMEOVER);
+            lock_state();
+            _state = StateMachine::State::GAMEOVER;
+            unlock_state();
             break;
-        case StateMachine::Event::QUIT:
-            set_state(StateMachine::State::EXIT);
+        case StateMachine::Event::Q_KEY:
+            lock_state();
+            _state = StateMachine::State::EXIT;
+            unlock_state();
             break;
         default:
             _scene->handle_player_control_event(event);
             break;
     }
-}
-
-void Game::set_state(StateMachine::State state) {
-    lock_state();
-    _state = state;
-    unlock_state();
 }

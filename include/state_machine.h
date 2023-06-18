@@ -7,8 +7,8 @@ __USING_API
 
 class StateMachine {
    public:
-    enum State { MENU, INGAME, PAUSED, GAMEOVER, EXIT };
-    enum Event { IDLE, FORWARD, BACKWARD, LEFT_TURN, RIGHT_TURN, SHOOT, PAUSE_TOGGLE, QUIT, RESTART, PLAYER_DEATH };
+    enum State { NONINITIALIZED, INGAME, PAUSED, GAMEOVER, EXIT };
+    enum Event { IDLE, UP, DOWN, LEFT, RIGHT, SPACE, P_KEY, Q_KEY, R_KEY, PLAYER_DEATH };
     StateMachine() {}
     ~StateMachine() {}
 };

@@ -1,6 +1,8 @@
 #ifndef matrix_h
 #define matrix_h
 
+#include <stdexcept>
+
 #include "../os/include/traits.h"
 
 __USING_API
@@ -33,33 +35,35 @@ class Matrix {
         }
     }
 
-    // TODO: Erros
     void set(int x, int y, const T& value) {
-        if ((x >= 0 && x < get_width()) && (y >= 0 && y < get_height())) {
-            this->_matrix[y * get_width() + x] = value;
+        if ((x >= 0 && x < this->_width) && (y >= 0 && y < this->_height)) {
+            this->_matrix[y * this->_width + x] = value;
+        } else {
+            throw std::out_of_range("x or y out of range");
         }
     }
 
-    // TODO: Erros
     const T& get(int x, int y) const {
-        if ((x >= 0 && x < get_width()) && (y >= 0 && y < get_height())) {
-            return this->_matrix[y * get_width() + x];
+        if ((x >= 0 && x < this->_width) && (y >= 0 && y < this->_height)) {
+            return this->_matrix[y * this->_width + x];
+        } else {
+            throw std::out_of_range("x or y out of range");
         }
     }
 
     void rotate(bool clockwise) {
-        T* new_matrix = new T[get_width() * get_height()];
+        T* new_matrix = new T[this->_width * this->_height];
 
         if (clockwise) {
-            for (int i = 0; i < get_width(); i++) {
-                for (int j = 0; j < get_height(); j++) {
-                    new_matrix[i * get_height() + j] = this->_matrix[(get_height() - j - 1) * get_width() + i];
+            for (int i = 0; i < this->_width; i++) {
+                for (int j = 0; j < this->_height; j++) {
+                    new_matrix[i * this->_height + j] = this->_matrix[(this->_height - j - 1) * this->_width + i];
                 }
             }
         } else {
-            for (int i = 0; i < get_width(); i++) {
-                for (int j = 0; j < get_height(); j++) {
-                    new_matrix[i * get_height() + j] = this->_matrix[j * get_width() + (get_width() - i - 1)];
+            for (int i = 0; i < this->_width; i++) {
+                for (int j = 0; j < this->_height; j++) {
+                    new_matrix[i * this->_height + j] = this->_matrix[j * this->_width + (this->_width - i - 1)];
                 }
             }
         }

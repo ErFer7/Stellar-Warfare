@@ -2,11 +2,10 @@
 
 __USING_API
 
-Renderer::Renderer(sf::Color background_color) {
-    this->_background_color = background_color;
+Renderer::Renderer() {
+    this->_background_color = sf::Color(155, 188, 15, 255);
+    this->thread = new Thread(render, this);
 }
-
-void Renderer::init() { this->thread = new Thread(render, this); }
 
 void Renderer::render(Renderer *renderer) {
     sf::RenderWindow *window = Game::get_window();
@@ -22,6 +21,7 @@ void Renderer::render(Renderer *renderer) {
         window->clear(renderer->get_background_color());
 
         Game::get_scene()->render(window);
+        // TODO: Renderizar UI
 
         window->display();
         Thread::yield();

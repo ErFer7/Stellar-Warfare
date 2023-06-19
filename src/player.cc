@@ -4,8 +4,8 @@
 
 __USING_API
 
-Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 0.0f) {
-    Type shape[] = {VOID, PLAYER, VOID, PLAYER, PLAYER, PLAYER, PLAYER, PLAYER, PLAYER};
+Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 8.0f, PLAYER, 3) {
+    bool shape[] = {false, true, false, true, true, true, true, true, true};
 
     this->set_graphics(texture);
     this->set_shape(3, 3, shape);
@@ -28,7 +28,12 @@ void Player::update_behaviour(Player *player) {
         player->_current_event = StateMachine::Event::IDLE;
         player->_event_sem->v();
 
-        player->lock_target_move();
+        if (!player->can_move()) {
+            Thread::yield();
+            continue;
+        }
+
+        player->lock_action();
         switch (event) {
             case StateMachine::Event::UP:
                 player->set_target_move(1, 0);
@@ -43,12 +48,12 @@ void Player::update_behaviour(Player *player) {
                 player->set_target_move(0, -90);
                 break;
             case StateMachine::Event::SPACE:
-                // player->move();
+                player->shoot();
                 break;
             default:
                 break;
         }
-        player->unlock_target_move();
+        player->unlock_action();
 
         Thread::yield();
     }

@@ -9,8 +9,8 @@ __USING_API
 class Bullet : public Entity {
    public:
     Bullet() {}
-    Bullet(int x, int y, Type type, float speed, sf::Texture *texture);
-    ~Bullet();
+    Bullet(int x, int y, int rotation, Type type, sf::Texture *texture);
+    ~Bullet() {}
     void update_behaviour();
 };
 

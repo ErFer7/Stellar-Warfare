@@ -12,13 +12,14 @@ __USING_API
 
 class Entity {
    public:
-    enum Type { VOID = 0b0000, PLAYER = 0b0001, ENEMY = 0b0010, PLAYER_BULLET = 0b0100, ENEMY_BULLET = 0b1000 };
+    enum Type { VOID, PLAYER, ENEMY, PLAYER_BULLET, ENEMY_BULLET };
 
     Entity() {
         this->_sprite = nullptr;
         this->_shape = nullptr;
+        this->_clock = nullptr;
     }
-    Entity(int x, int y, int rotation, float speed);
+    Entity(int x, int y, int rotation, float speed, Type type);
     ~Entity();
     inline unsigned int get_id() { return this->_id; }
     void render(sf::RenderWindow *window);
@@ -29,30 +30,40 @@ class Entity {
     inline int get_target_direction() { return this->_target_direction; }
     inline int get_target_rotation() { return this->_target_rotation; }
     void reset_target_move();
-    inline Matrix<Type> *get_shape() { return this->_shape; }
+    inline Matrix<bool> *get_shape() { return this->_shape; }
     inline bool is_destroyed() { return this->_destroyed; }
     inline void destroy() { this->_destroyed = true; }
+    inline Type get_type() { return this->_type; }
+    inline bool has_target_move() { return this->_has_target_move; }
+    inline void set_index(unsigned int index) { this->_index = index; }
+    inline unsigned int get_index() { return this->_index; }
+    bool can_move();
 
    protected:
     void set_graphics(sf::Texture *texture);
-    void set_shape(int width, int height, Type *type);
+    void set_shape(int width, int height, bool *shape);
 
    private:
     void update_sprite();
 
    private:
     static unsigned int _id_counter;
+    unsigned int _index;
     unsigned int _id;
     int _position[2];
     int _rotation;
     int _target_direction;
     int _target_rotation;
+    bool _has_target_move;
     float _speed;
+    float _time_accumulator;
     int _scale;
     sf::Color _color;
     sf::Sprite *_sprite;
-    Matrix<Type> *_shape;
+    Matrix<bool> *_shape;
     bool _destroyed;
+    Type _type;
+    sf::Clock *_clock;
 };
 
 #endif

@@ -39,7 +39,7 @@ class Matrix {
         if ((x >= 0 && x < this->_width) && (y >= 0 && y < this->_height)) {
             this->_matrix[y * this->_width + x] = value;
         } else {
-            throw std::out_of_range("x or y out of range");
+            throw std::out_of_range("set: x or y out of range");
         }
     }
 
@@ -47,7 +47,7 @@ class Matrix {
         if ((x >= 0 && x < this->_width) && (y >= 0 && y < this->_height)) {
             return this->_matrix[y * this->_width + x];
         } else {
-            throw std::out_of_range("x or y out of range");
+            throw std::out_of_range("get: x or y out of range");
         }
     }
 

@@ -6,8 +6,9 @@ __USING_API
 
 unsigned int Entity::_id_counter = 0;
 
-Entity::Entity(int x, int y, int rotation, float speed) {
+Entity::Entity(int x, int y, int rotation, float speed, Type type) {
     this->_id = _id_counter++;
+    this->_index = -1;
     this->_position[0] = x;
     this->_position[1] = y;
     this->_rotation = rotation;
@@ -16,9 +17,12 @@ Entity::Entity(int x, int y, int rotation, float speed) {
     this->_sprite = new sf::Sprite();
     this->_shape = nullptr;
     this->_speed = speed;
+    this->_time_accumulator = 0;
     this->_scale = 24;
     this->_color = sf::Color(15, 45, 15, 255);
     this->_destroyed = false;
+    this->_type = type;
+    this->_clock = new sf::Clock();
 }
 
 Entity::~Entity() {
@@ -30,6 +34,11 @@ Entity::~Entity() {
     if (this->_shape) {
         delete this->_shape;
         this->_shape = nullptr;
+    }
+
+    if (this->_clock) {
+        delete this->_clock;
+        this->_clock = nullptr;
     }
 }
 
@@ -43,18 +52,31 @@ void Entity::set_graphics(sf::Texture *texture) {
     update_sprite();
 }
 
-void Entity::set_shape(int width, int height, Type *type) {
+bool Entity::can_move() {
+    this->_time_accumulator += this->_clock->getElapsedTime().asSeconds();
+    this->_clock->restart();
+
+    return this->_time_accumulator >= 1.0f / this->_speed;
+}
+
+void Entity::set_shape(int width, int height, bool *shape) {
     if (this->_shape) {
         delete this->_shape;
     }
 
-    this->_shape = new Matrix<Type>(width, height, VOID);
-    this->_shape->fill(width, height, type);
+    this->_shape = new Matrix<bool>(width, height, false);
+    this->_shape->fill(width, height, shape);
+
+    for (int i = this->_rotation; i > 0; i -= 90) {
+        this->_shape->rotate(true);
+    }
 }
 
 void Entity::set_target_move(int direction, int rotation) {
     this->_target_direction = direction;
     this->_target_rotation = rotation;
+    this->_has_target_move = true;
+    this->_time_accumulator = 0;
 }
 
 void Entity::set_position_and_rotation(int x, int y, int rotation) {
@@ -68,6 +90,7 @@ void Entity::set_position_and_rotation(int x, int y, int rotation) {
 void Entity::reset_target_move() {
     this->_target_direction = 0;
     this->_target_rotation = 0;
+    this->_has_target_move = false;
 }
 
 void Entity::update_sprite() {

@@ -1,8 +1,6 @@
 #ifndef scene_h
 #define scene_h
 
-#include <vector>
-
 #include "../os/include/thread.h"
 #include "../os/include/traits.h"
 #include "../os/include/semaphore.h"
@@ -12,6 +10,8 @@
 #include "player.h"
 #include "thread_container.h"
 #include "entity.h"
+#include "matrix.h"
+#include "dynamic_array.h"
 
 __USING_API
 
@@ -29,20 +29,23 @@ class Scene final : public ThreadContainer {
    private:
     static void update_scene(Scene *scene);
     void create_player();
-    void create_enemy();
-    void create_bullet();
+    void create_enemy(int spot = -1);
+    void create_bullet(int x, int y, int rotation, Entity::Type type);
+    void destroy_bullet(unsigned int i);
     void solve_collisions(Entity *entity);
     bool solve_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y, int rotation);
+    bool solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation);
 
    private:
     int _width;
     int _height;
+    int _score;
     sf::Texture *_player_texture;
     sf::Texture *_enemy_texture;
     sf::Texture *_bullet_texture;
     Player *_player;
-    std::vector<Enemy *> *_enemies;
-    std::vector<Bullet *> *_bullets;
+    DynamicArray<Enemy *> *_enemies;
+    DynamicArray<Bullet *> *_bullets;
     Semaphore *_scene_sem;
 };
 

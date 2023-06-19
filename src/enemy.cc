@@ -1,11 +1,12 @@
 #include "../include/enemy.h"
+
 #include <random>
 
 __USING_API
 
 Enemy::Enemy(int x, int y, float rotation, float speed, sf::Texture *texture)
-    : Spaceship(x, y, rotation, speed) {
-    Type shape[] = {VOID, ENEMY, VOID, ENEMY, ENEMY, ENEMY, ENEMY, VOID, ENEMY};
+    : Spaceship(x, y, rotation, speed, ENEMY, 1) {
+    bool shape[] = {false, true, false, true, true, true, true, false, true};
 
     this->set_graphics(texture);
     this->set_shape(3, 3, shape);
@@ -16,9 +17,24 @@ Enemy::~Enemy() {}
 
 void Enemy::update_behaviour(Enemy *enemy) {
     while (!enemy->is_destroyed()) {
-        enemy->lock_target_move();
-        enemy->set_target_move(rand() % 3 - 1, 0);
-        enemy->unlock_target_move();
+        if (!enemy->can_move()) {
+            Thread::yield();
+            continue;
+        }
+
+        enemy->lock_action();
+        int random_direction = rand() % 3 - 1;
+        if (random() % 2) {
+            enemy->set_target_move(random_direction, 90);
+        } else {
+            enemy->set_target_move(random_direction, -90);
+        }
+
+        if (random() % 30 == 0) {
+            enemy->shoot();
+        }
+
+        enemy->unlock_action();
 
         Thread::yield();
     }

@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include <iostream>
 #include <stdexcept>
 
 __USING_API
@@ -9,9 +10,10 @@ __USING_API
 Scene::Scene() {
     this->_width = 30;
     this->_height = 30;
+    this->_score = 0;
     this->_player = nullptr;
-    this->_enemies = new std::vector<Enemy *>();
-    this->_bullets = new std::vector<Bullet *>();
+    this->_enemies = new DynamicArray<Enemy *>(4);
+    this->_bullets = new DynamicArray<Bullet *>(10);
     this->_scene_sem = new Semaphore(1);
 
     this->_player_texture = new sf::Texture();
@@ -46,12 +48,14 @@ Scene::~Scene() {
 }
 
 void Scene::start_game() {
+    this->lock_scene();
+    this->_score = 0;
     this->create_player();
 
-    // TODO: Mudar pra 4 depois
-    for (int i = 0; i < 1; i++) {
-        this->create_enemy();
+    for (int i = 0; i < 4; i++) {
+        this->create_enemy(i);
     }
+    this->unlock_scene();
 }
 
 void Scene::update_scene(Scene *scene) {
@@ -68,21 +72,54 @@ void Scene::update_scene(Scene *scene) {
         Game::unlock_state();
 
         scene->lock_scene();
-        // TODO: Rotina de spawn de inimigos
-        Player *player = scene->get_player();
-        player->lock_target_move();
-        scene->solve_collisions(player);
-        player->unlock_target_move();
-
-        for (size_t i = 0; i < scene->_enemies->size(); i++) {
-            Enemy *enemy = scene->_enemies->at(i);
-            enemy->lock_target_move();
-            scene->solve_collisions(enemy);
-            enemy->unlock_target_move();
+        for (unsigned int i = 0; i < scene->_bullets->size(); i++) {
+            Bullet *bullet = (*scene->_bullets)[i];
+            if (bullet) {
+                bullet->update_behaviour();
+            }
         }
 
-        for (size_t i = 0; i < scene->_bullets->size(); i++) {
-            scene->solve_collisions(scene->_bullets->at(i));
+        // TODO: Rotina de spawn de inimigos
+
+        Player *player = scene->get_player();
+        player->lock_action();
+        if (player->is_shooting()) {
+            player->reset_shooting();
+            int x = player->get_shot_spawn_x();
+            int y = player->get_shot_spawn_y();
+            int rotation = player->get_rotation();
+            scene->create_bullet(x, y, rotation, Entity::Type::PLAYER_BULLET);
+        }
+
+        if (player->has_target_move()) {
+            scene->solve_collisions(player);
+        }
+        player->unlock_action();
+
+        for (unsigned int i = 0; i < scene->_enemies->size(); i++) {
+            Enemy *enemy = (*scene->_enemies)[i];
+            if (enemy) {
+                enemy->lock_action();
+                if (enemy->is_shooting()) {
+                    enemy->reset_shooting();
+                    int x = enemy->get_shot_spawn_x();
+                    int y = enemy->get_shot_spawn_y();
+                    int rotation = enemy->get_rotation();
+                    scene->create_bullet(x, y, rotation, Entity::Type::ENEMY_BULLET);
+                }
+
+                if (enemy->has_target_move()) {
+                    scene->solve_collisions(enemy);
+                }
+                enemy->unlock_action();
+            }
+        }
+
+        for (unsigned int i = 0; i < scene->_bullets->size(); i++) {
+            Bullet *bullet = (*scene->_bullets)[i];
+            if (bullet) {
+                scene->solve_collisions(bullet);
+            }
         }
         scene->unlock_scene();
 
@@ -95,100 +132,187 @@ void Scene::update_scene(Scene *scene) {
 }
 
 void Scene::create_player() {
-    this->lock_scene();
     int x = this->_width / 2;
     int y = this->_height / 2;
     this->_player = new Player(x, y, this->_player_texture);
-    this->unlock_scene();
 }
 
-void Scene::create_enemy() {
-    this->lock_scene();
-    this->_enemies->push_back(new Enemy(4, 4, 0, 0.0f, this->_enemy_texture));
-    this->unlock_scene();
+void Scene::create_enemy(int spot) {
+    if (spot == -1) {
+        spot = rand() % 4;
+    }
+
+    int spawn_x;
+    int spawn_y;
+    int spawn_rotation;
+
+    switch (spot) {
+        case 0:
+            spawn_x = 2;
+            spawn_y = 2;
+            spawn_rotation = 180;
+            break;
+        case 1:
+            spawn_x = 2;
+            spawn_y = this->_height - 3;
+            spawn_rotation = 0;
+            break;
+        case 2:
+            spawn_x = this->_width - 3;
+            spawn_y = this->_height - 3;
+            spawn_rotation = 0;
+            break;
+        case 3:
+            spawn_x = this->_width - 3;
+            spawn_y = 2;
+            spawn_rotation = 180;
+            break;
+        default:
+            break;
+    }
+
+    // TODO: Checar se o spot está ocupado
+
+    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, 8.0f, this->_enemy_texture));
+    (*this->_enemies)[index]->set_index(index);
 }
 
-void Scene::create_bullet() {
-    // this->_bullets.push_back(Bullet());
+void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
+    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_bullet_texture));
+    (*this->_bullets)[index]->set_index(index);
+}
+
+void Scene::destroy_bullet(unsigned int i) {
+    delete (*this->_bullets)[i];
+    (*this->_bullets)[i] = nullptr;
 }
 
 void Scene::solve_collisions(Entity *entity) {
-    bool move = true;
-
     int target_rotation = entity->get_target_rotation();
     int direction = entity->get_target_direction();
-    int new_rotation = (entity->get_rotation() + target_rotation) % 360;
-    int new_x = entity->get_position()[0] + static_cast<int>(sin(entity->get_rotation() * M_PI / 180) * direction);
-    int new_y = entity->get_position()[1] + static_cast<int>(cos(entity->get_rotation() * M_PI / 180) * -direction);
+    int old_rotation = entity->get_rotation();
+    int new_rotation = (old_rotation + target_rotation) % 360;
+    int old_x = entity->get_position()[0];
+    int old_y = entity->get_position()[1];
+    int new_x = old_x + static_cast<int>(sin(old_rotation * M_PI / 180) * direction);
+    int new_y = old_y + static_cast<int>(cos(old_rotation * M_PI / 180) * -direction);
 
     if (target_rotation != 0) {
         entity->get_shape()->rotate(target_rotation > 0);
     }
 
-    // TODO: Resolver colisões
-
-    if (entity->get_id() != this->_player->get_id()) {
-        move = solve_precise_collision(entity, this->_player, new_x, new_y, target_rotation);
-    }
-
-    for (size_t i = 0; i < this->_enemies->size(); i++) {
-        if (entity->get_id() != this->_enemies->at(i)->get_id()) {
-            move = solve_precise_collision(entity, this->_enemies->at(i), new_x, new_y, target_rotation);
-        }
-    }
-
-    for (size_t i = 0; i < this->_bullets->size(); i++) {
-        if (entity->get_id() != this->_bullets->at(i)->get_id()) {
-            move = solve_precise_collision(entity, this->_bullets->at(i), new_x, new_y, target_rotation);
-        }
-    }
-
     entity->reset_target_move();
 
-    if (move) {
-        entity->set_position_and_rotation(new_x, new_y, new_rotation);
+    if (!solve_boundary_collision(entity, new_x, new_y, target_rotation)) {
+        return;
     }
+
+    if (entity->get_id() != this->_player->get_id()) {
+        if (!solve_precise_collision(entity, this->_player, new_x, new_y, target_rotation)) {
+            return;
+        }
+    }
+
+    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
+        Enemy *enemy = (*this->_enemies)[i];
+        if (enemy) {
+            if (entity->get_id() != enemy->get_id()) {
+                if (!solve_precise_collision(entity, enemy, new_x, new_y, target_rotation)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    for (unsigned int i = 0; i < this->_bullets->size(); i++) {
+        Bullet *bullet = (*this->_bullets)[i];
+        if (bullet) {
+            if (entity->get_id() != bullet->get_id()) {
+                if (!solve_precise_collision(entity, bullet, new_x, new_y, target_rotation)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    entity->set_position_and_rotation(new_x, new_y, new_rotation);
 }
 
 bool Scene::solve_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y, int rotation) {
-    int distance_x = abs(entity2->get_position()[0] - new_x);
-    int distance_y = abs(entity2->get_position()[1] - new_y);
-    int total_width = entity1->get_shape()->get_width() * 0.5 + entity2->get_shape()->get_width() * 0.5;
-    int total_height = entity1->get_shape()->get_height() * 0.5 + entity2->get_shape()->get_height() * 0.5;
+    int entity2_x = entity2->get_position()[0];
+    int entity2_y = entity2->get_position()[1];
+    int distance_x = abs(entity2_x - new_x);
+    int distance_y = abs(entity2_y - new_y);
+    Matrix<bool> *entity1_shape = entity1->get_shape();
+    Matrix<bool> *entity2_shape = entity2->get_shape();
+    Entity::Type entity1_type = entity1->get_type();
+    Entity::Type entity2_type = entity2->get_type();
+    int total_width = entity1_shape->get_width() * 0.5 + entity2_shape->get_width() * 0.5;
+    int total_height = entity1_shape->get_height() * 0.5 + entity2_shape->get_height() * 0.5;
 
     if (distance_x <= total_width && distance_y <= total_height) {
-        int offset = -static_cast<int>(entity1->get_shape()->get_width() * 0.5);
-        int entity_offset_x = new_x - entity2->get_position()[0];
-        int entity_offset_y = new_y - entity2->get_position()[1];
+        int entity_offset_x = new_x - entity2_x;
+        int entity_offset_y = new_y - entity2_y;
 
-        for (int i = 0; i < entity1->get_shape()->get_width(); i++) {
-            for (int j = 0; j < entity1->get_shape()->get_height(); j++) {
-                // TODO: Mover essa lógica para outro lugar
-                if (new_x + i + offset < 0 || new_x + i + offset >= this->_width || new_y + j + offset < 0 ||
-                    new_y + j + offset >= this->_height) {
-                    if (rotation != 0) {
-                        entity1->get_shape()->rotate(rotation < 0);
-                    }
-                    return false;
-                }
-
-                int entity1Type = static_cast<int>(entity1->get_shape()->get(i, j));
+        for (int i = 0; i < entity1_shape->get_width(); i++) {
+            for (int j = 0; j < entity1_shape->get_height(); j++) {
+                bool entity1Cell = entity1_shape->get(i, j);
 
                 int comp_pos_x = i + entity_offset_x;
                 int comp_pos_y = j + entity_offset_y;
 
-                if ((comp_pos_x >= 0 && comp_pos_x < entity1->get_shape()->get_width()) &&
-                    (comp_pos_y >= 0 && comp_pos_y < entity1->get_shape()->get_height())) {
-                    int entity2_type = static_cast<int>(entity2->get_shape()->get(comp_pos_x, comp_pos_y));
-                    Entity::Type type = static_cast<Entity::Type>(entity1Type | entity2_type);
+                if (comp_pos_x < 0 || comp_pos_x >= entity2_shape->get_width() || comp_pos_y < 0 ||
+                    comp_pos_y >= entity2_shape->get_height()) {
+                    continue;
+                }
 
-                    if (type == (Entity::Type::PLAYER | Entity::Type::ENEMY)) {
+                int entity2Cell = entity2_shape->get(comp_pos_x, comp_pos_y);
+
+                if (entity1Cell && entity2Cell) {
+                    // TODO: Tratar colisões
+                    if ((entity1_type == Entity::Type::PLAYER && entity2_type == Entity::Type::ENEMY) ||
+                        (entity1_type == Entity::Type::ENEMY && entity2_type == Entity::Type::PLAYER)) {
+                        // TODO: Destruir o jogador e terminar o jogo
+                    } else if (entity1_type == Entity::Type::ENEMY && entity2_type == Entity::Type::ENEMY) {
                         if (rotation != 0) {
-                            entity1->get_shape()->rotate(rotation < 0);
+                            entity1_shape->rotate(rotation < 0);
                         }
+                        return false;
+                    } else if ((entity1_type == Entity::Type::PLAYER_BULLET &&
+                                entity2_type == Entity::Type::ENEMY_BULLET) ||
+                               (entity1_type == Entity::Type::ENEMY_BULLET &&
+                                entity2_type == Entity::Type::PLAYER_BULLET)) {
+                        // TODO: Destruir as duas balas
+                        destroy_bullet(entity1->get_index());
+                        destroy_bullet(entity2->get_index());
                         return false;
                     }
                 }
+            }
+        }
+    }
+
+    return true;
+}
+
+bool Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation) {
+    int offset = -static_cast<int>(entity->get_shape()->get_width() * 0.5);
+
+    for (int i = 0; i < entity->get_shape()->get_width(); i++) {
+        for (int j = 0; j < entity->get_shape()->get_height(); j++) {
+            int x = i + new_x + offset;
+            int y = j + new_y + offset;
+            if (x < 0 || x >= this->_width || y < 0 || y >= this->_height) {
+                if (entity->get_type() == Entity::Type::PLAYER_BULLET ||
+                    entity->get_type() == Entity::Type::ENEMY_BULLET) {
+                    destroy_bullet(entity->get_index());
+                    return false;
+                }
+
+                if (rotation != 0) {
+                    entity->get_shape()->rotate(rotation < 0);
+                }
+                return false;
             }
         }
     }
@@ -202,13 +326,20 @@ void Scene::render(sf::RenderWindow *window) {
         this->_player->render(window);
     }
 
-    for (size_t i = 0; i < this->_enemies->size(); i++) {
-        this->_enemies->at(i)->render(window);
+    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
+        Enemy *enemy = (*this->_enemies)[i];
+        if (enemy) {
+            enemy->render(window);
+        }
     }
 
-    for (size_t i; i < this->_bullets->size(); i++) {
-        this->_bullets->at(i)->render(window);
+    for (unsigned int i = 0; i < this->_bullets->size(); i++) {
+        Bullet *bullet = (*this->_bullets)[i];
+        if (bullet) {
+            bullet->render(window);
+        }
     }
+
     this->unlock_scene();
 }
 

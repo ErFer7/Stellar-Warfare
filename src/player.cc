@@ -22,18 +22,24 @@ Player::~Player() {
 }
 
 void Player::update_behaviour(Player *player) {
-    while (!player->is_destroyed()) {
+    while (true) {
         player->_event_sem->p();
         StateMachine::Event event = player->_current_event;
         player->_current_event = StateMachine::Event::IDLE;
         player->_event_sem->v();
 
+        player->lock();
+        if (player->get_health() <= 0) {
+            player->unlock();
+            break;
+        }
+
         if (!player->can_move()) {
+            player->unlock();
             Thread::yield();
             continue;
         }
 
-        player->lock_action();
         switch (event) {
             case StateMachine::Event::UP:
                 player->set_target_move(1, 0);
@@ -53,7 +59,7 @@ void Player::update_behaviour(Player *player) {
             default:
                 break;
         }
-        player->unlock_action();
+        player->unlock();
 
         Thread::yield();
     }

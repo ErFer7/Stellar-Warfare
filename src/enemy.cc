@@ -16,13 +16,19 @@ Enemy::Enemy(int x, int y, float rotation, float speed, sf::Texture *texture)
 Enemy::~Enemy() {}
 
 void Enemy::update_behaviour(Enemy *enemy) {
-    while (!enemy->is_destroyed()) {
+    while (true) {
+        enemy->lock();
+        if (enemy->get_health() <= 0) {
+            enemy->unlock();
+            break;
+        }
+
         if (!enemy->can_move()) {
+            enemy->unlock();
             Thread::yield();
             continue;
         }
 
-        enemy->lock_action();
         int random_direction = rand() % 3 - 1;
         if (random() % 2) {
             enemy->set_target_move(random_direction, 90);
@@ -33,8 +39,7 @@ void Enemy::update_behaviour(Enemy *enemy) {
         if (random() % 30 == 0) {
             enemy->shoot();
         }
-
-        enemy->unlock_action();
+        enemy->unlock();
 
         Thread::yield();
     }

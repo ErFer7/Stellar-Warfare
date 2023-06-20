@@ -1,22 +1,24 @@
 #ifndef scene_h
 #define scene_h
 
+#include "../os/include/semaphore.h"
 #include "../os/include/thread.h"
 #include "../os/include/traits.h"
-#include "../os/include/semaphore.h"
 #include "bullet.h"
+#include "dynamic_array.h"
 #include "enemy.h"
+#include "entity.h"
 #include "game.h"
+#include "matrix.h"
 #include "player.h"
 #include "thread_container.h"
-#include "entity.h"
-#include "matrix.h"
-#include "dynamic_array.h"
 
 __USING_API
 
 class Scene final : public ThreadContainer {
    public:
+    enum CollisionResult { OK, BLOCKED, DESTROYED };
+
     Scene();
     ~Scene();
     void render(sf::RenderWindow *window);
@@ -31,10 +33,17 @@ class Scene final : public ThreadContainer {
     void create_player();
     void create_enemy(int spot = -1);
     void create_bullet(int x, int y, int rotation, Entity::Type type);
+    void destroy_player();
     void destroy_bullet(unsigned int i);
+    void destroy_enemy(unsigned int i);
+    void update_all_entities();
     void solve_collisions(Entity *entity);
-    bool solve_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y, int rotation);
-    bool solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation);
+    CollisionResult check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y);
+    CollisionResult solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation);
+    CollisionResult solve_entity_collision(Entity *entity1, Entity *entity2);
+    void destroy_dead_spaceships();
+    void update_bullets_behavior();
+    void apply_collision_result(CollisionResult result, Entity *entity, int new_x, int new_y, int new_rotation);
 
    private:
     int _width;

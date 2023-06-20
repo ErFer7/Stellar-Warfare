@@ -2,17 +2,22 @@
 
 __USING_API
 
-Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health) : Entity(x, y, rotation, speed, type) {
+Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health)
+    : Entity(x, y, rotation, speed, type) {
     this->_health = health;
     this->_shooting = false;
-    this->_action_sem = new Semaphore(1);
+    this->_sem = new Semaphore(1);
 }
 
 Spaceship::~Spaceship() {
-    if (this->_action_sem) {
-        delete this->_action_sem;
-        this->_action_sem = nullptr;
+    if (this->_sem) {
+        delete this->_sem;
+        this->_sem = nullptr;
     }
+}
+
+void Spaceship::kill() {
+    this->_health = 0;
 }
 
 int Spaceship::get_shot_spawn_x() {

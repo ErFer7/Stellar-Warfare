@@ -20,9 +20,9 @@ Entity::Entity(int x, int y, int rotation, float speed, Type type) {
     this->_time_accumulator = 0;
     this->_scale = 24;
     this->_color = sf::Color(15, 45, 15, 255);
-    this->_destroyed = false;
     this->_type = type;
     this->_clock = new sf::Clock();
+    this->_already_simulated = false;
 }
 
 Entity::~Entity() {
@@ -98,6 +98,5 @@ void Entity::update_sprite() {
     int y = this->_position[1] * this->_scale + this->_scale * 0.5;
 
     this->_sprite->setPosition(x, y);
-
     this->_sprite->setRotation(this->_rotation);
 }

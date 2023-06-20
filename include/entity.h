@@ -31,12 +31,12 @@ class Entity {
     inline int get_target_rotation() { return this->_target_rotation; }
     void reset_target_move();
     inline Matrix<bool> *get_shape() { return this->_shape; }
-    inline bool is_destroyed() { return this->_destroyed; }
-    inline void destroy() { this->_destroyed = true; }
     inline Type get_type() { return this->_type; }
     inline bool has_target_move() { return this->_has_target_move; }
     inline void set_index(unsigned int index) { this->_index = index; }
     inline unsigned int get_index() { return this->_index; }
+    inline void set_already_simulated(bool already_simulated) { this->_already_simulated = already_simulated; }
+    inline bool already_simulated() { return this->_already_simulated; }
     bool can_move();
 
    protected:
@@ -61,9 +61,9 @@ class Entity {
     sf::Color _color;
     sf::Sprite *_sprite;
     Matrix<bool> *_shape;
-    bool _destroyed;
     Type _type;
     sf::Clock *_clock;
+    bool _already_simulated;
 };
 
 #endif

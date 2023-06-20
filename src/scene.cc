@@ -233,10 +233,6 @@ void Scene::solve_collisions(Entity *entity) {
     int new_x = old_x + static_cast<int>(sin(old_rotation * M_PI / 180) * direction);
     int new_y = old_y + static_cast<int>(cos(old_rotation * M_PI / 180) * -direction);
 
-    if (target_rotation != 0) {
-        entity->get_shape()->rotate(target_rotation > 0);
-    }
-
     entity->reset_target_move();
 
     CollisionResult result = OK;
@@ -296,44 +292,23 @@ Scene::CollisionResult Scene::check_precise_collision(Entity *entity1, Entity *e
     int entity2_y = entity2->get_position()[1];
     int distance_x = abs(entity2_x - new_x);
     int distance_y = abs(entity2_y - new_y);
-    Matrix<bool> *entity1_shape = entity1->get_shape();
-    Matrix<bool> *entity2_shape = entity2->get_shape();
-    int total_width = entity1_shape->get_width() * 0.5 + entity2_shape->get_width() * 0.5;
-    int total_height = entity1_shape->get_height() * 0.5 + entity2_shape->get_height() * 0.5;
+    int entity1_size = entity1->get_size();
+    int entity2_size = entity2->get_size();
+    int total_width = entity1_size * 0.5 + entity2_size * 0.5;
+    int total_height = entity1_size * 0.5 + entity2_size * 0.5;
 
     if (distance_x <= total_width && distance_y <= total_height) {
-        int entity_offset_x = new_x - entity2_x;
-        int entity_offset_y = new_y - entity2_y;
-
-        for (int i = 0; i < entity1_shape->get_width(); i++) {
-            for (int j = 0; j < entity1_shape->get_height(); j++) {
-                bool entity1Cell = entity1_shape->get(i, j);
-
-                int comp_pos_x = i + entity_offset_x;
-                int comp_pos_y = j + entity_offset_y;
-
-                if (comp_pos_x < 0 || comp_pos_x >= entity2_shape->get_width() || comp_pos_y < 0 ||
-                    comp_pos_y >= entity2_shape->get_height()) {
-                    continue;
-                }
-
-                int entity2Cell = entity2_shape->get(comp_pos_x, comp_pos_y);
-
-                if (entity1Cell && entity2Cell) {
-                    return solve_entity_collision(entity1, entity2);
-                }
-            }
-        }
+        return solve_entity_collision(entity1, entity2);
     }
 
     return OK;
 }
 
 Scene::CollisionResult Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation) {
-    int offset = -static_cast<int>(entity->get_shape()->get_width() * 0.5);
+    int offset = -entity->get_size() * 0.5;
 
-    for (int i = 0; i < entity->get_shape()->get_width(); i++) {
-        for (int j = 0; j < entity->get_shape()->get_height(); j++) {
+    for (int i = 0; i < entity->get_size(); i++) {
+        for (int j = 0; j < entity->get_size(); j++) {
             int x = i + new_x + offset;
             int y = j + new_y + offset;
             if (x < 0 || x >= this->_width || y < 0 || y >= this->_height) {
@@ -341,10 +316,6 @@ Scene::CollisionResult Scene::solve_boundary_collision(Entity *entity, int new_x
                     entity->get_type() == Entity::Type::ENEMY_BULLET) {
                     destroy_bullet(entity->get_index());
                     return DESTROYED;
-                }
-
-                if (rotation != 0) {
-                    entity->get_shape()->rotate(rotation < 0);
                 }
                 return BLOCKED;
             }
@@ -476,19 +447,6 @@ void Scene::apply_collision_result(CollisionResult result, Entity *entity, int n
     switch (result) {
         case OK:
             entity->set_position_and_rotation(new_x, new_y, new_rotation);
-            break;
-        case BLOCKED:
-            if (new_rotation != 0) {
-                entity->get_shape()->rotate(new_rotation < 0);
-            }
-            break;
-        case DESTROYED:
-            if (entity->get_type() != Entity::Type::PLAYER_BULLET && entity->get_type() != Entity::Type::ENEMY_BULLET) {
-                if (new_rotation != 0) {
-                    entity->get_shape()->rotate(new_rotation < 0);
-                }
-                break;
-            }
             break;
         default:
             break;

@@ -6,10 +6,8 @@ __USING_API
 
 Enemy::Enemy(int x, int y, float rotation, float speed, sf::Texture *texture)
     : Spaceship(x, y, rotation, speed, ENEMY, 1) {
-    bool shape[] = {false, true, false, true, true, true, true, false, true};
 
     this->set_graphics(texture);
-    this->set_shape(3, 3, shape);
     this->thread = new Thread(this->update_behaviour, this);
 }
 

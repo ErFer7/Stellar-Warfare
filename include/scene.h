@@ -9,7 +9,6 @@
 #include "enemy.h"
 #include "entity.h"
 #include "game.h"
-#include "matrix.h"
 #include "player.h"
 #include "thread_container.h"
 

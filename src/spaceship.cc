@@ -3,7 +3,7 @@
 __USING_API
 
 Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health)
-    : Entity(x, y, rotation, speed, type) {
+    : Entity(x, y, rotation, speed, type, 3) {
     this->_health = health;
     this->_shooting = false;
     this->_sem = new Semaphore(1);
@@ -22,7 +22,7 @@ void Spaceship::kill() {
 
 int Spaceship::get_shot_spawn_x() {
     int diff_x = 0;
-    int half_width = static_cast<int>(this->get_shape()->get_width() * 0.5);
+    int half_width = this->get_size() * 0.5;
     int rotation = this->get_rotation();
 
     if (rotation == 90) {
@@ -36,7 +36,7 @@ int Spaceship::get_shot_spawn_x() {
 
 int Spaceship::get_shot_spawn_y() {
     int diff_y = 0;
-    int half_height = static_cast<int>(this->get_shape()->get_height() * 0.5);
+    int half_height = this->get_size() * 0.5;
     int rotation = this->get_rotation();
 
     if (rotation == 0) {

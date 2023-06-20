@@ -5,10 +5,8 @@
 __USING_API
 
 Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 8.0f, PLAYER, 3) {
-    bool shape[] = {false, true, false, true, true, true, true, true, true};
 
     this->set_graphics(texture);
-    this->set_shape(3, 3, shape);
     this->_current_event = StateMachine::Event::IDLE;
     this->_event_sem = new Semaphore(1);
     this->thread = new Thread(this->update_behaviour, this);

@@ -6,7 +6,6 @@
 
 #include "../os/include/semaphore.h"
 #include "../os/include/traits.h"
-#include "matrix.h"
 
 __USING_API
 
@@ -16,10 +15,9 @@ class Entity {
 
     Entity() {
         this->_sprite = nullptr;
-        this->_shape = nullptr;
         this->_clock = nullptr;
     }
-    Entity(int x, int y, int rotation, float speed, Type type);
+    Entity(int x, int y, int rotation, float speed, Type type, int size);
     ~Entity();
     inline unsigned int get_id() { return this->_id; }
     void render(sf::RenderWindow *window);
@@ -30,7 +28,7 @@ class Entity {
     inline int get_target_direction() { return this->_target_direction; }
     inline int get_target_rotation() { return this->_target_rotation; }
     void reset_target_move();
-    inline Matrix<bool> *get_shape() { return this->_shape; }
+    inline int get_size() { return this->_size; }
     inline Type get_type() { return this->_type; }
     inline bool has_target_move() { return this->_has_target_move; }
     inline void set_index(unsigned int index) { this->_index = index; }
@@ -41,7 +39,6 @@ class Entity {
 
    protected:
     void set_graphics(sf::Texture *texture);
-    void set_shape(int width, int height, bool *shape);
 
    private:
     void update_sprite();
@@ -60,7 +57,7 @@ class Entity {
     int _scale;
     sf::Color _color;
     sf::Sprite *_sprite;
-    Matrix<bool> *_shape;
+    int _size;
     Type _type;
     sf::Clock *_clock;
     bool _already_simulated;

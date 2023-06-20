@@ -33,8 +33,6 @@ class Entity {
     inline bool has_target_move() { return this->_has_target_move; }
     inline void set_index(unsigned int index) { this->_index = index; }
     inline unsigned int get_index() { return this->_index; }
-    inline void set_already_simulated(bool already_simulated) { this->_already_simulated = already_simulated; }
-    inline bool already_simulated() { return this->_already_simulated; }
     bool can_move();
 
    protected:
@@ -60,7 +58,6 @@ class Entity {
     int _size;
     Type _type;
     sf::Clock *_clock;
-    bool _already_simulated;
 };
 
 #endif

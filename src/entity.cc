@@ -22,7 +22,6 @@ Entity::Entity(int x, int y, int rotation, float speed, Type type, int size) {
     this->_color = sf::Color(15, 45, 15, 255);
     this->_type = type;
     this->_clock = new sf::Clock();
-    this->_already_simulated = false;
 }
 
 Entity::~Entity() {

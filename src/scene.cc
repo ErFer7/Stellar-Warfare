@@ -216,25 +216,6 @@ void Scene::update_all_entities() {
             solve_collisions(bullet);
         }
     }
-
-    // Reseta o estado de simulação de todas as entidades
-    if (this->_player) {
-        this->_player->set_already_simulated(false);
-    }
-
-    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy *enemy = (*this->_enemies)[i];
-        if (enemy) {
-            enemy->set_already_simulated(false);
-        }
-    }
-
-    for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet *bullet = (*this->_bullets)[i];
-        if (bullet) {
-            bullet->set_already_simulated(false);
-        }
-    }
 }
 
 void Scene::solve_collisions(Entity *entity) {
@@ -253,7 +234,7 @@ void Scene::solve_collisions(Entity *entity) {
         return;
     }
 
-    if (this->_player && entity->get_id() != this->_player->get_id() && !this->_player->already_simulated()) {
+    if (this->_player && entity->get_id() != this->_player->get_id()) {
         if (!check_precise_collision(entity, this->_player, new_x, new_y)) {
             return;
         }
@@ -261,7 +242,7 @@ void Scene::solve_collisions(Entity *entity) {
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
         Enemy *enemy = (*this->_enemies)[i];
-        if (enemy && entity->get_id() != enemy->get_id() && !enemy->already_simulated()) {
+        if (enemy && entity->get_id() != enemy->get_id()) {
             if (!check_precise_collision(entity, enemy, new_x, new_y)) {
                 return;
             }
@@ -270,14 +251,13 @@ void Scene::solve_collisions(Entity *entity) {
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
         Bullet *bullet = (*this->_bullets)[i];
-        if (bullet && entity->get_id() != bullet->get_id() && !bullet->already_simulated()) {
+        if (bullet && entity->get_id() != bullet->get_id()) {
             if (!check_precise_collision(entity, bullet, new_x, new_y)) {
                 return;
             }
         }
     }
 
-    entity->set_already_simulated(true);
     entity->set_position_and_rotation(new_x, new_y, new_rotation);
 }
 

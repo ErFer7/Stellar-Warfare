@@ -71,11 +71,11 @@ void Scene::update_scene(Scene *scene) {
         }
         Game::unlock_state();
 
-        scene->lock_scene();
         scene->update_bullets_behavior();
+
+        scene->lock_scene();
         // TODO: Rotina de spawn de inimigos
         scene->update_all_entities();
-        scene->destroy_dead_spaceships();
         scene->unlock_scene();
 
         Thread::yield();
@@ -138,6 +138,9 @@ void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
 }
 
 void Scene::destroy_player() {
+    this->_player->kill();
+    this->_player->unlock();
+    this->_player->join();
     delete this->_player;
     this->_player = nullptr;
 }
@@ -148,6 +151,9 @@ void Scene::destroy_bullet(unsigned int i) {
 }
 
 void Scene::destroy_enemy(unsigned int i) {
+    (*this->_enemies)[i]->kill();
+    (*this->_enemies)[i]->unlock();
+    (*this->_enemies)[i]->join();
     delete (*this->_enemies)[i];
     (*this->_enemies)[i] = nullptr;
 }
@@ -167,7 +173,11 @@ void Scene::update_all_entities() {
         if (this->_player->has_target_move()) {
             solve_collisions(this->_player);
         }
-        this->_player->unlock();
+
+        // É necessário checar se o jogador ainda existe, pois ele pode ter sido destruído
+        if (this->_player) {
+            this->_player->unlock();
+        }
     }
 
     // Processa os inimigos
@@ -191,7 +201,11 @@ void Scene::update_all_entities() {
             if (enemy->has_target_move()) {
                 solve_collisions(enemy);
             }
-            enemy->unlock();
+
+            // A verificação é feita assim pois o ponteiro enemy pode não ser nulo após a destruição
+            if ((*this->_enemies)[i]) {
+                enemy->unlock();
+            }
         }
     }
 
@@ -235,97 +249,108 @@ void Scene::solve_collisions(Entity *entity) {
 
     entity->reset_target_move();
 
-    CollisionResult result = OK;
-
-    result = solve_boundary_collision(entity, new_x, new_y, target_rotation);
-
-    if (result == DESTROYED) {
-        apply_collision_result(result, entity, new_x, new_y, new_rotation);
+    if (!solve_boundary_collision(entity, new_x, new_y)) {
         return;
     }
 
     if (this->_player && entity->get_id() != this->_player->get_id() && !this->_player->already_simulated()) {
-        CollisionResult temp_result = check_precise_collision(entity, this->_player, new_x, new_y);
-        result = temp_result != OK ? temp_result : result;
-
-        if (result == DESTROYED) {
-            apply_collision_result(result, entity, new_x, new_y, new_rotation);
+        if (!check_precise_collision(entity, this->_player, new_x, new_y)) {
             return;
         }
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
         Enemy *enemy = (*this->_enemies)[i];
-        if (enemy) {
-            if (entity->get_id() != enemy->get_id() && !enemy->already_simulated()) {
-                CollisionResult temp_result = check_precise_collision(entity, enemy, new_x, new_y);
-                result = temp_result != OK ? temp_result : result;
-
-                if (temp_result == DESTROYED) {
-                    apply_collision_result(result, entity, new_x, new_y, new_rotation);
-                    return;
-                }
+        if (enemy && entity->get_id() != enemy->get_id() && !enemy->already_simulated()) {
+            if (!check_precise_collision(entity, enemy, new_x, new_y)) {
+                return;
             }
         }
     }
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
         Bullet *bullet = (*this->_bullets)[i];
-        if (bullet) {
-            if (entity->get_id() != bullet->get_id() && !bullet->already_simulated()) {
-                CollisionResult temp_result = check_precise_collision(entity, bullet, new_x, new_y);
-                result = temp_result != OK ? temp_result : result;
-
-                if (temp_result == DESTROYED) {
-                    apply_collision_result(result, entity, new_x, new_y, new_rotation);
-                    return;
-                }
+        if (bullet && entity->get_id() != bullet->get_id() && !bullet->already_simulated()) {
+            if (!check_precise_collision(entity, bullet, new_x, new_y)) {
+                return;
             }
         }
     }
 
-    apply_collision_result(result, entity, new_x, new_y, new_rotation);
+    entity->set_already_simulated(true);
+    entity->set_position_and_rotation(new_x, new_y, new_rotation);
 }
 
-Scene::CollisionResult Scene::check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y) {
-    int entity2_x = entity2->get_position()[0];
-    int entity2_y = entity2->get_position()[1];
-    int distance_x = abs(entity2_x - new_x);
-    int distance_y = abs(entity2_y - new_y);
-    int entity1_size = entity1->get_size();
-    int entity2_size = entity2->get_size();
-    int total_width = entity1_size * 0.5 + entity2_size * 0.5;
-    int total_height = entity1_size * 0.5 + entity2_size * 0.5;
+bool Scene::check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y) {
+    int x2 = entity2->get_position()[0];
+    int y2 = entity2->get_position()[1];
+    int size1 = entity1->get_size();
+    int size2 = entity2->get_size();
 
-    if (distance_x <= total_width && distance_y <= total_height) {
-        return solve_entity_collision(entity1, entity2);
-    }
-
-    return OK;
-}
-
-Scene::CollisionResult Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation) {
-    int offset = -entity->get_size() * 0.5;
-
-    for (int i = 0; i < entity->get_size(); i++) {
-        for (int j = 0; j < entity->get_size(); j++) {
-            int x = i + new_x + offset;
-            int y = j + new_y + offset;
-            if (x < 0 || x >= this->_width || y < 0 || y >= this->_height) {
-                if (entity->get_type() == Entity::Type::PLAYER_BULLET ||
-                    entity->get_type() == Entity::Type::ENEMY_BULLET) {
-                    destroy_bullet(entity->get_index());
-                    return DESTROYED;
-                }
-                return BLOCKED;
-            }
+    if (entity1->get_size() >= entity2->get_size()) {
+        if (check_corner_collision(new_x, new_y, x2, y2, size1, size2)) {
+            return solve_entity_collision(entity1, entity2);
+        }
+    } else {
+        if (check_corner_collision(x2, y2, new_x, new_y, size2, size1)) {
+            return solve_entity_collision(entity1, entity2);
         }
     }
 
-    return OK;
+    return true;
 }
 
-Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
+// Verifica se uma entidade está dentro da outra
+bool Scene::check_corner_collision(int x1, int y1, int x2, int y2, int size1, int size2) {
+    int offset1 = size1 * 0.5f;
+    int offset2 = size2 * 0.5f;
+
+    // Maior entidade (ou igual)
+    int entity1_right = x1 + offset1;
+    int entity1_left = x1 - offset1;
+    int entity1_top = y1 - offset1;
+    int entity1_bottom = y1 + offset1;
+
+    // Menor entidade (ou igual)
+    int entity2_right = x2 + offset2;
+    int entity2_left = x2 - offset2;
+    int entity2_top = y2 - offset2;
+    int entity2_bottom = y2 + offset2;
+
+    bool top_left = entity2_left >= entity1_left && entity2_left <= entity1_right && entity2_top >= entity1_top &&
+                    entity2_top <= entity1_bottom;
+
+    bool top_right = entity2_right >= entity1_left && entity2_right <= entity1_right && entity2_top >= entity1_top &&
+                     entity2_top <= entity1_bottom;
+
+    bool bottom_left = entity2_left >= entity1_left && entity2_left <= entity1_right && entity2_bottom >= entity1_top &&
+                       entity2_bottom <= entity1_bottom;
+
+    bool bottom_right = entity2_right >= entity1_left && entity2_right <= entity1_right &&
+                        entity2_bottom >= entity1_top && entity2_bottom <= entity1_bottom;
+
+    return top_left || top_right || bottom_left || bottom_right;
+}
+
+bool Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y) {
+    int offset = entity->get_size() * 0.5f;
+    int right = new_x + offset;
+    int left = new_x - offset;
+    int top = new_y - offset;
+    int bottom = new_y + offset;
+
+    if (left < 0 || right >= this->_width || top < 0 || bottom >= this->_height) {
+        if (entity->get_type() == Entity::Type::PLAYER_BULLET || entity->get_type() == Entity::Type::ENEMY_BULLET) {
+            destroy_bullet(entity->get_index());
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
     Entity::Type entity1_type = entity1->get_type();
     Entity::Type entity2_type = entity2->get_type();
 
@@ -333,17 +358,19 @@ Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *en
         case Entity::Type::PLAYER:
             switch (entity2_type) {
                 case Entity::Type::ENEMY:
-                    static_cast<Player *>(entity1)->kill();
-                    static_cast<Enemy *>(entity2)->kill();
-                    return DESTROYED;
+                    destroy_player();
+                    static_cast<Enemy *>(entity2)->lock();
+                    destroy_enemy(entity2->get_index());
+                    return false;
                 case Entity::Type::ENEMY_BULLET:
                     static_cast<Player *>(entity1)->apply_damage(1);
+                    destroy_bullet(entity2->get_index());
 
                     if (static_cast<Player *>(entity1)->get_health() <= 0) {
-                        static_cast<Player *>(entity1)->kill();
+                        destroy_player();
+                        return false;
                     }
-                    destroy_bullet(entity2->get_index());
-                    return OK;
+                    return false;
                 default:
                     break;
             }
@@ -351,15 +378,16 @@ Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *en
         case Entity::Type::ENEMY:
             switch (entity2_type) {
                 case Entity::Type::PLAYER:
-                    static_cast<Player *>(entity2)->kill();
-                    static_cast<Enemy *>(entity1)->kill();
-                    return DESTROYED;
+                    static_cast<Player *>(entity2)->lock();
+                    destroy_player();
+                    destroy_enemy(entity1->get_index());
+                    return false;
                 case Entity::Type::ENEMY:
-                    return BLOCKED;
+                    return false;
                 case Entity::Type::PLAYER_BULLET:
-                    static_cast<Enemy *>(entity1)->kill();
+                    destroy_enemy(entity1->get_index());
                     destroy_bullet(entity2->get_index());
-                    return DESTROYED;
+                    return false;
                 default:
                     break;
             }
@@ -367,13 +395,14 @@ Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *en
         case Entity::Type::PLAYER_BULLET:
             switch (entity2_type) {
                 case Entity::Type::ENEMY:
-                    static_cast<Enemy *>(entity2)->kill();
+                    static_cast<Enemy *>(entity2)->lock();
+                    destroy_enemy(entity2->get_index());
                     destroy_bullet(entity1->get_index());
-                    return DESTROYED;
+                    return false;
                 case Entity::Type::ENEMY_BULLET:
                     destroy_bullet(entity1->get_index());
                     destroy_bullet(entity2->get_index());
-                    return DESTROYED;
+                    return false;
                 default:
                     break;
             }
@@ -381,17 +410,20 @@ Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *en
         case Entity::Type::ENEMY_BULLET:
             switch (entity2_type) {
                 case Entity::Type::PLAYER:
+                    static_cast<Player *>(entity2)->lock();
                     static_cast<Player *>(entity2)->apply_damage(1);
 
                     if (static_cast<Player *>(entity2)->get_health() <= 0) {
-                        static_cast<Player *>(entity2)->kill();
+                        destroy_player();
+                    } else {
+                        static_cast<Player *>(entity2)->unlock();
                     }
                     destroy_bullet(entity1->get_index());
-                    return DESTROYED;
+                    return false;
                 case Entity::Type::PLAYER_BULLET:
                     destroy_bullet(entity1->get_index());
                     destroy_bullet(entity2->get_index());
-                    return DESTROYED;
+                    return false;
                 default:
                     break;
             }
@@ -400,36 +432,7 @@ Scene::CollisionResult Scene::solve_entity_collision(Entity *entity1, Entity *en
             break;
     }
 
-    return OK;
-}
-
-void Scene::destroy_dead_spaceships() {
-    if (this->_player) {
-        this->_player->lock();
-        if (this->_player->get_health() <= 0) {
-            this->_player->unlock();
-            this->_player->join();
-            destroy_player();
-
-            // Emitir evento de fim de jogo
-        } else {
-            this->_player->unlock();
-        }
-    }
-
-    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy *enemy = (*this->_enemies)[i];
-        if (enemy) {
-            enemy->lock();
-            if (enemy->get_health() <= 0) {
-                enemy->unlock();
-                enemy->join();
-                destroy_enemy(enemy->get_index());
-            } else {
-                enemy->unlock();
-            }
-        }
-    }
+    return true;
 }
 
 void Scene::update_bullets_behavior() {
@@ -438,18 +441,6 @@ void Scene::update_bullets_behavior() {
         if (bullet) {
             bullet->update_behaviour();
         }
-    }
-}
-
-void Scene::apply_collision_result(CollisionResult result, Entity *entity, int new_x, int new_y, int new_rotation) {
-    entity->set_already_simulated(true);
-
-    switch (result) {
-        case OK:
-            entity->set_position_and_rotation(new_x, new_y, new_rotation);
-            break;
-        default:
-            break;
     }
 }
 

@@ -6,10 +6,7 @@ __USING_API
 
 Enemy::Enemy(int x, int y, float rotation, float speed, sf::Texture *texture)
     : Spaceship(x, y, rotation, speed, ENEMY, 1) {
-    bool shape[] = {false, true, false, true, true, true, true, false, true};
-
     this->set_graphics(texture);
-    this->set_shape(3, 3, shape);
     this->thread = new Thread(this->update_behaviour, this);
 }
 
@@ -36,7 +33,7 @@ void Enemy::update_behaviour(Enemy *enemy) {
             enemy->set_target_move(random_direction, -90);
         }
 
-        if (random() % 30 == 0) {
+        if (random() % 10 == 0) {
             enemy->shoot();
         }
         enemy->unlock();

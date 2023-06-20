@@ -9,7 +9,6 @@
 #include "enemy.h"
 #include "entity.h"
 #include "game.h"
-#include "matrix.h"
 #include "player.h"
 #include "thread_container.h"
 
@@ -17,8 +16,6 @@ __USING_API
 
 class Scene final : public ThreadContainer {
    public:
-    enum CollisionResult { OK, BLOCKED, DESTROYED };
-
     Scene();
     ~Scene();
     void render(sf::RenderWindow *window);
@@ -38,12 +35,11 @@ class Scene final : public ThreadContainer {
     void destroy_enemy(unsigned int i);
     void update_all_entities();
     void solve_collisions(Entity *entity);
-    CollisionResult check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y);
-    CollisionResult solve_boundary_collision(Entity *entity, int new_x, int new_y, int rotation);
-    CollisionResult solve_entity_collision(Entity *entity1, Entity *entity2);
-    void destroy_dead_spaceships();
+    bool check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y);
+    bool check_corner_collision(int x1, int y1, int x2, int y2, int size1, int size2);
+    bool solve_boundary_collision(Entity *entity, int new_x, int new_y);
+    bool solve_entity_collision(Entity *entity1, Entity *entity2);
     void update_bullets_behavior();
-    void apply_collision_result(CollisionResult result, Entity *entity, int new_x, int new_y, int new_rotation);
 
    private:
     int _width;

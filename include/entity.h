@@ -19,21 +19,21 @@ class Entity {
     }
     Entity(int x, int y, int rotation, float speed, Type type, int size);
     ~Entity();
+
     inline unsigned int get_id() { return this->_id; }
-    void render(sf::RenderWindow *window);
-    void set_target_move(int direction, int rotation);
+    inline unsigned int get_index() { return this->_index; }
     inline int *get_position() { return this->_position; }
-    inline int get_rotation() { return this->_rotation; }
-    void set_position_and_rotation(int x, int y, int rotation);
-    inline int get_target_direction() { return this->_target_direction; }
-    inline int get_target_rotation() { return this->_target_rotation; }
-    void reset_target_move();
+    inline int *get_target_move() { return this->_target_move; }
     inline int get_size() { return this->_size; }
-    inline Type get_type() { return this->_type; }
+    inline int get_rotation() { return this->_rotation; }
     inline bool has_target_move() { return this->_has_target_move; }
     inline void set_index(unsigned int index) { this->_index = index; }
-    inline unsigned int get_index() { return this->_index; }
+    inline Type get_type() { return this->_type; }
     bool can_move();
+    void set_position_and_rotation(int x, int y, int rotation);
+    void render(sf::RenderWindow *window);
+    void set_target_move(int x, int y);
+    void reset_target_move();
 
    protected:
     void set_graphics(sf::Texture *texture);
@@ -43,20 +43,19 @@ class Entity {
 
    private:
     static unsigned int _id_counter;
-    unsigned int _index;
     unsigned int _id;
+    unsigned int _index;
     int _position[2];
     int _rotation;
-    int _target_direction;
-    int _target_rotation;
+    int _target_move[2];
+    int _scale;
+    int _size;
     bool _has_target_move;
     float _speed;
     float _time_accumulator;
-    int _scale;
+    Type _type;
     sf::Color _color;
     sf::Sprite *_sprite;
-    int _size;
-    Type _type;
     sf::Clock *_clock;
 };
 

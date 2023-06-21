@@ -21,11 +21,21 @@ void Enemy::update_behaviour(Enemy *enemy) {
         }
 
         if (enemy->can_move()) {
-            int random_direction = rand() % 3 - 1;
-            if (random() % 2) {
-                enemy->set_target_move(random_direction, 90);
-            } else {
-                enemy->set_target_move(random_direction, -90);
+            switch (random() % 4) {
+                case 0:
+                    enemy->set_target_move(0, -1);
+                    break;
+                case 1:
+                    enemy->set_target_move(0, 1);
+                    break;
+                case 2:
+                    enemy->set_target_move(1, 0);
+                    break;
+                case 3:
+                    enemy->set_target_move(-1, 0);
+                    break;
+                default:
+                    break;
             }
         }
 

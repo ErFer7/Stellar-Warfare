@@ -13,6 +13,7 @@ class Renderer final : public ThreadContainer {
    public:
     Renderer();
     ~Renderer() {}
+
     inline sf::Color get_background_color() { return this->_background_color; }
 
    private:

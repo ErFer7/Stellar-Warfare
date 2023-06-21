@@ -12,15 +12,15 @@ Scene::Scene() {
     this->_height = 30;
     this->_score = 0;
     this->_player = nullptr;
+    this->_skip_time = false;
+    this->_enemy_spawn_count = 4;
+    this->_scene_sem = new Semaphore(1);
     this->_enemies = new DynamicArray<Enemy *>(4, nullptr);
     this->_bullets = new DynamicArray<Bullet *>(10, nullptr);
     this->_enemy_spawn_times = new DynamicArray<float>(4, -1.0f);
     this->_enemy_spawn_times->fill(-1.0f);
-    this->_scene_sem = new Semaphore(1);
-    this->_enemy_spawn_count = 4;
-    this->_clock = new sf::Clock();
-    this->_skip_time = false;
 
+    this->_clock = new sf::Clock();
     this->_player_texture = new sf::Texture();
     this->_enemy_texture = new sf::Texture();
     this->_bullet_texture = new sf::Texture();
@@ -122,6 +122,7 @@ void Scene::update_scene(Scene *scene) {
 void Scene::create_player() {
     int x = this->_width / 2;
     int y = this->_height / 2;
+
     this->_player = new Player(x, y, this->_player_texture);
 }
 
@@ -230,9 +231,11 @@ void Scene::update_all_entities() {
         this->_player->lock();
         if (this->_player->is_shooting()) {
             this->_player->reset_shooting();
+
             int x = this->_player->get_shot_spawn_x();
             int y = this->_player->get_shot_spawn_y();
             int rotation = this->_player->get_rotation();
+
             create_bullet(x, y, rotation, Entity::Type::PLAYER_BULLET);
         }
 
@@ -258,9 +261,11 @@ void Scene::update_all_entities() {
 
             if (enemy->is_shooting()) {
                 enemy->reset_shooting();
+
                 int x = enemy->get_shot_spawn_x();
                 int y = enemy->get_shot_spawn_y();
                 int rotation = enemy->get_rotation();
+
                 create_bullet(x, y, rotation, Entity::Type::ENEMY_BULLET);
             }
 
@@ -285,14 +290,21 @@ void Scene::update_all_entities() {
 }
 
 void Scene::solve_collisions(Entity *entity) {
-    int target_rotation = entity->get_target_rotation();
-    int direction = entity->get_target_direction();
-    int old_rotation = entity->get_rotation();
-    int new_rotation = (old_rotation + target_rotation) % 360;
-    int old_x = entity->get_position()[0];
-    int old_y = entity->get_position()[1];
-    int new_x = old_x + static_cast<int>(sin(old_rotation * M_PI / 180) * direction);
-    int new_y = old_y + static_cast<int>(cos(old_rotation * M_PI / 180) * -direction);
+    int new_rotation = entity->get_rotation();
+    int target_move_x = entity->get_target_move()[0];
+    int target_move_y = entity->get_target_move()[1];
+    int new_x = entity->get_position()[0] + target_move_x;
+    int new_y = entity->get_position()[1] + target_move_y;
+
+    if (target_move_x == 1) {
+        new_rotation = 90;
+    } else if (target_move_x == -1) {
+        new_rotation = 270;
+    } else if (target_move_y == -1) {
+        new_rotation = 0;
+    } else if (target_move_y == 1) {
+        new_rotation = 180;
+    }
 
     entity->reset_target_move();
 
@@ -363,17 +375,15 @@ bool Scene::check_corner_collision(int x1, int y1, int x2, int y2, int size1, in
     int entity2_top = y2 - offset2;
     int entity2_bottom = y2 + offset2;
 
-    bool top_left = entity2_left >= entity1_left && entity2_left <= entity1_right && entity2_top >= entity1_top &&
-                    entity2_top <= entity1_bottom;
+    bool horizontal_check_left = entity2_left >= entity1_left && entity2_left <= entity1_right;
+    bool horizontal_check_right = entity2_right >= entity1_left && entity2_right <= entity1_right;
+    bool vertical_check_top = entity2_top >= entity1_top && entity2_top <= entity1_bottom;
+    bool vertical_check_bottom = entity2_bottom >= entity1_top && entity2_bottom <= entity1_bottom;
 
-    bool top_right = entity2_right >= entity1_left && entity2_right <= entity1_right && entity2_top >= entity1_top &&
-                     entity2_top <= entity1_bottom;
-
-    bool bottom_left = entity2_left >= entity1_left && entity2_left <= entity1_right && entity2_bottom >= entity1_top &&
-                       entity2_bottom <= entity1_bottom;
-
-    bool bottom_right = entity2_right >= entity1_left && entity2_right <= entity1_right &&
-                        entity2_bottom >= entity1_top && entity2_bottom <= entity1_bottom;
+    bool top_left = horizontal_check_left && vertical_check_top;
+    bool top_right = horizontal_check_right && vertical_check_top;
+    bool bottom_left = horizontal_check_left && vertical_check_bottom;
+    bool bottom_right = horizontal_check_right && vertical_check_bottom;
 
     return !(top_left || top_right || bottom_left || bottom_right);
 }
@@ -404,89 +414,76 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
 
     switch (entity1_type) {
         case Entity::Type::PLAYER:
-            switch (entity2_type) {
-                case Entity::Type::ENEMY:
-                    enemy = static_cast<Enemy *>(entity2);
-                    enemy->lock();
-                    destroy_enemy(enemy->get_index());
+            if (entity2_type == Entity::Type::ENEMY) {
+                enemy = static_cast<Enemy *>(entity2);
+                enemy->lock();
+                destroy_enemy(enemy->get_index());
+                destroy_player();
+                end_game();
+                Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                return false;
+            } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
+                destroy_bullet(entity2->get_index());
+                player = static_cast<Player *>(entity1);
+                player->apply_damage(1);
+
+                if (player->get_health() <= 0) {
                     destroy_player();
-                    end_game();
                     Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                     return false;
-                case Entity::Type::ENEMY_BULLET:
-                    destroy_bullet(entity2->get_index());
-                    player = static_cast<Player *>(entity1);
-                    player->apply_damage(1);
-
-                    if (player->get_health() <= 0) {
-                        destroy_player();
-                        Game::handle_event(StateMachine::Event::PLAYER_DEATH);
-                        return false;
-                    }
-                    return false;
-                default:
-                    break;
+                }
             }
             break;
         case Entity::Type::ENEMY:
-            switch (entity2_type) {
-                case Entity::Type::PLAYER:
-                    destroy_enemy(entity1->get_index());
-                    static_cast<Player *>(entity2)->lock();
-                    destroy_player();
-                    end_game();
-                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
-                    return false;
-                case Entity::Type::ENEMY:
-                    return false;
-                case Entity::Type::PLAYER_BULLET:
-                    destroy_enemy(entity1->get_index());
-                    destroy_bullet(entity2->get_index());
-                    this->_score += 100;
-                    return false;
-                default:
-                    break;
+            if (entity2_type == Entity::Type::PLAYER) {
+                destroy_enemy(entity1->get_index());
+                static_cast<Player *>(entity2)->lock();
+                destroy_player();
+                end_game();
+                Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                return false;
+            } else if (entity2_type == Entity::Type::ENEMY) {
+                return false;
+            } else if (entity2_type == Entity::Type::PLAYER_BULLET) {
+                destroy_enemy(entity1->get_index());
+                destroy_bullet(entity2->get_index());
+                this->_score += 100;
+                return false;
             }
             break;
         case Entity::Type::PLAYER_BULLET:
-            switch (entity2_type) {
-                case Entity::Type::ENEMY:
-                    destroy_bullet(entity1->get_index());
-                    enemy = static_cast<Enemy *>(entity2);
-                    enemy->lock();
-                    destroy_enemy(enemy->get_index());
-                    this->_score += 100;
-                    return false;
-                case Entity::Type::ENEMY_BULLET:
-                    destroy_bullet(entity1->get_index());
-                    destroy_bullet(entity2->get_index());
-                    return false;
-                default:
-                    break;
+            if (entity2_type == Entity::Type::ENEMY) {
+                destroy_bullet(entity1->get_index());
+                enemy = static_cast<Enemy *>(entity2);
+                enemy->lock();
+                destroy_enemy(enemy->get_index());
+                this->_score += 100;
+                return false;
+            } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
+                destroy_bullet(entity1->get_index());
+                destroy_bullet(entity2->get_index());
+                return false;
             }
             break;
         case Entity::Type::ENEMY_BULLET:
-            switch (entity2_type) {
-                case Entity::Type::PLAYER:
-                    destroy_bullet(entity1->get_index());
-                    player = static_cast<Player *>(entity2);
-                    player->lock();
-                    player->apply_damage(1);
+            if (entity2_type == Entity::Type::PLAYER) {
+                destroy_bullet(entity1->get_index());
+                player = static_cast<Player *>(entity2);
+                player->lock();
+                player->apply_damage(1);
 
-                    if (player->get_health() <= 0) {
-                        destroy_player();
-                        end_game();
-                        Game::handle_event(StateMachine::Event::PLAYER_DEATH);
-                    } else {
-                        player->unlock();
-                    }
-                    return false;
-                case Entity::Type::PLAYER_BULLET:
-                    destroy_bullet(entity1->get_index());
-                    destroy_bullet(entity2->get_index());
-                    return false;
-                default:
-                    break;
+                if (player->get_health() <= 0) {
+                    destroy_player();
+                    end_game();
+                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                } else {
+                    player->unlock();
+                }
+                return false;
+            } else if (entity2_type == Entity::Type::PLAYER_BULLET) {
+                destroy_bullet(entity1->get_index());
+                destroy_bullet(entity2->get_index());
+                return false;
             }
             break;
         default:

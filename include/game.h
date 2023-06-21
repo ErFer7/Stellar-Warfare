@@ -21,6 +21,7 @@ class Game {
    public:
     Game() {}
     ~Game() {}
+
     static void init();
     static void run();
     static void free();

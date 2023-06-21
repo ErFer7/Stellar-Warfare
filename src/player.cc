@@ -34,16 +34,16 @@ void Player::update_behaviour(Player *player) {
         if (player->can_move()) {
             switch (event) {
                 case StateMachine::Event::UP:
-                    player->set_target_move(1, 0);
+                    player->set_target_move(0, -1);
                     break;
                 case StateMachine::Event::DOWN:
-                    player->set_target_move(-1, 0);
+                    player->set_target_move(0, 1);
                     break;
                 case StateMachine::Event::RIGHT:
-                    player->set_target_move(0, 90);
+                    player->set_target_move(1, 0);
                     break;
                 case StateMachine::Event::LEFT:
-                    player->set_target_move(0, -90);
+                    player->set_target_move(-1, 0);
                     break;
                 default:
                     break;

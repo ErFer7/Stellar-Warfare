@@ -4,12 +4,12 @@ __USING_API
 
 Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate)
     : Entity(x, y, rotation, speed, type, 3) {
-    this->_health = health;
     this->_shooting = false;
+    this->_shot_time_accumulator = 0.0f;
+    this->_health = health;
+    this->_firerate = firerate;
     this->_sem = new Semaphore(1);
     this->_firerate_clock = new sf::Clock();
-    this->_firerate = firerate;
-    this->_shot_time_accumulator = 0.0f;
 }
 
 Spaceship::~Spaceship() {

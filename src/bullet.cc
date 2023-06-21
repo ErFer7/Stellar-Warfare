@@ -8,6 +8,28 @@ Bullet::Bullet(int x, int y, int rotation, Type type, sf::Texture *texture) : En
 
 void Bullet::update_behaviour() {
     if (this->can_move()) {
-        this->set_target_move(1, 0);
+        int x = 0;
+        int y = 0;
+        int rotation = this->get_rotation();
+
+        switch (rotation)
+        {
+        case 0:
+            y = -1;
+            break;
+        case 90:
+            x = 1;
+            break;
+        case 180:
+            y = 1;
+            break;
+        case 270:
+            x = -1;
+            break;
+        default:
+            break;
+        }
+
+        this->set_target_move(x, y);
     }
 }

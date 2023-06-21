@@ -17,7 +17,9 @@ Scene::Scene() {
     this->_enemy_spawn_times = new DynamicArray<float>(4, -1.0f);
     this->_enemy_spawn_times->fill(-1.0f);
     this->_scene_sem = new Semaphore(1);
+    this->_enemy_spawn_count = 4;
     this->_clock = new sf::Clock();
+    this->_skip_time = false;
 
     this->_player_texture = new sf::Texture();
     this->_enemy_texture = new sf::Texture();
@@ -61,6 +63,32 @@ void Scene::start_game() {
     this->unlock_scene();
 }
 
+void Scene::end_game() {
+    this->_score = 0;
+
+    if (this->_player) {
+        this->_player->lock();
+        this->destroy_player();
+    }
+
+    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
+        Enemy *enemy = (*this->_enemies)[i];
+
+        if (enemy) {
+            enemy->lock();
+            this->destroy_enemy(i);
+        }
+    }
+
+    for (unsigned int i = 0; i < this->_bullets->size(); i++) {
+        Bullet *bullet = (*this->_bullets)[i];
+
+        if (bullet) {
+            this->destroy_bullet(i);
+        }
+    }
+}
+
 void Scene::update_scene(Scene *scene) {
     while (true) {
         Game::lock_state();
@@ -84,7 +112,9 @@ void Scene::update_scene(Scene *scene) {
         Thread::yield();
     }
 
-    // TODO: Limpar tudo que foi alocado
+    scene->lock_scene();
+    scene->end_game();
+    scene->unlock_scene();
 
     scene->get_thread()->thread_exit(0);
 }
@@ -164,6 +194,7 @@ void Scene::create_enemy(int spot) {
 
     unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, 8.0f, this->_enemy_texture));
     (*this->_enemies)[index]->set_index(index);
+    this->_enemy_spawn_count--;
 }
 
 void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
@@ -368,21 +399,28 @@ bool Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y) {
 bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
     Entity::Type entity1_type = entity1->get_type();
     Entity::Type entity2_type = entity2->get_type();
+    Player *player = nullptr;
+    Enemy *enemy = nullptr;
 
     switch (entity1_type) {
         case Entity::Type::PLAYER:
             switch (entity2_type) {
                 case Entity::Type::ENEMY:
+                    enemy = static_cast<Enemy *>(entity2);
+                    enemy->lock();
+                    destroy_enemy(enemy->get_index());
                     destroy_player();
-                    static_cast<Enemy *>(entity2)->lock();
-                    destroy_enemy(entity2->get_index());
+                    end_game();
+                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                     return false;
                 case Entity::Type::ENEMY_BULLET:
-                    static_cast<Player *>(entity1)->apply_damage(1);
                     destroy_bullet(entity2->get_index());
+                    player = static_cast<Player *>(entity1);
+                    player->apply_damage(1);
 
-                    if (static_cast<Player *>(entity1)->get_health() <= 0) {
+                    if (player->get_health() <= 0) {
                         destroy_player();
+                        Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                         return false;
                     }
                     return false;
@@ -393,15 +431,18 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
         case Entity::Type::ENEMY:
             switch (entity2_type) {
                 case Entity::Type::PLAYER:
+                    destroy_enemy(entity1->get_index());
                     static_cast<Player *>(entity2)->lock();
                     destroy_player();
-                    destroy_enemy(entity1->get_index());
+                    end_game();
+                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                     return false;
                 case Entity::Type::ENEMY:
                     return false;
                 case Entity::Type::PLAYER_BULLET:
                     destroy_enemy(entity1->get_index());
                     destroy_bullet(entity2->get_index());
+                    this->_score += 100;
                     return false;
                 default:
                     break;
@@ -410,9 +451,11 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
         case Entity::Type::PLAYER_BULLET:
             switch (entity2_type) {
                 case Entity::Type::ENEMY:
-                    static_cast<Enemy *>(entity2)->lock();
-                    destroy_enemy(entity2->get_index());
                     destroy_bullet(entity1->get_index());
+                    enemy = static_cast<Enemy *>(entity2);
+                    enemy->lock();
+                    destroy_enemy(enemy->get_index());
+                    this->_score += 100;
                     return false;
                 case Entity::Type::ENEMY_BULLET:
                     destroy_bullet(entity1->get_index());
@@ -425,15 +468,18 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
         case Entity::Type::ENEMY_BULLET:
             switch (entity2_type) {
                 case Entity::Type::PLAYER:
-                    static_cast<Player *>(entity2)->lock();
-                    static_cast<Player *>(entity2)->apply_damage(1);
-
-                    if (static_cast<Player *>(entity2)->get_health() <= 0) {
-                        destroy_player();
-                    } else {
-                        static_cast<Player *>(entity2)->unlock();
-                    }
                     destroy_bullet(entity1->get_index());
+                    player = static_cast<Player *>(entity2);
+                    player->lock();
+                    player->apply_damage(1);
+
+                    if (player->get_health() <= 0) {
+                        destroy_player();
+                        end_game();
+                        Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                    } else {
+                        player->unlock();
+                    }
                     return false;
                 case Entity::Type::PLAYER_BULLET:
                     destroy_bullet(entity1->get_index());
@@ -460,16 +506,19 @@ void Scene::update_bullets_behavior() {
 }
 
 void Scene::spawn_enemies() {
-    int spawn_count = 0;
-
     for (unsigned int i = 0; i < this->_enemy_spawn_times->size(); i++) {
+        if (this->should_skip_time()) {
+            this->set_skip_time(false);
+            break;
+        }
+
         float time = (*this->_enemy_spawn_times)[i];
 
         if (time > 0.0f) {
             time -= this->_clock->getElapsedTime().asSeconds();
 
             if (time <= 0.0f) {
-                spawn_count++;
+                this->_enemy_spawn_count++;
                 time = -1.0f;
             }
 
@@ -477,7 +526,7 @@ void Scene::spawn_enemies() {
         }
     }
 
-    for (int i = 0; i < spawn_count; i++) {
+    for (int i = 0; i < this->_enemy_spawn_count; i++) {
         create_enemy();
     }
 

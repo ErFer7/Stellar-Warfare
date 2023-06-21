@@ -10,5 +10,3 @@ ThreadContainer::~ThreadContainer() {
         this->thread = nullptr;
     }
 }
-
-void ThreadContainer::join() { this->thread->join(); }

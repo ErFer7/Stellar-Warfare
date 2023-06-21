@@ -10,8 +10,10 @@ class ThreadContainer {
    public:
     ThreadContainer();
     ~ThreadContainer();
-    void join();
     inline Thread *get_thread() { return this->thread; }
+    inline void join() { this->thread->join(); }
+    inline void suspend() { this->thread->suspend(); }
+    inline void resume() { this->thread->resume(); }
 
    protected:
     Thread *thread;

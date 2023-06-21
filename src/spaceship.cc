@@ -2,11 +2,14 @@
 
 __USING_API
 
-Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health)
+Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate)
     : Entity(x, y, rotation, speed, type, 3) {
     this->_health = health;
     this->_shooting = false;
     this->_sem = new Semaphore(1);
+    this->_firerate_clock = new sf::Clock();
+    this->_firerate = firerate;
+    this->_shot_time_accumulator = 0.0f;
 }
 
 Spaceship::~Spaceship() {
@@ -14,11 +17,14 @@ Spaceship::~Spaceship() {
         delete this->_sem;
         this->_sem = nullptr;
     }
+
+    if (this->_firerate_clock) {
+        delete this->_firerate_clock;
+        this->_firerate_clock = nullptr;
+    }
 }
 
-void Spaceship::kill() {
-    this->_health = 0;
-}
+void Spaceship::kill() { this->_health = 0; }
 
 int Spaceship::get_shot_spawn_x() {
     int diff_x = 0;
@@ -46,4 +52,16 @@ int Spaceship::get_shot_spawn_y() {
     }
 
     return this->get_position()[1] + diff_y;
+}
+
+bool Spaceship::can_shoot() {
+    this->_shot_time_accumulator += this->_firerate_clock->getElapsedTime().asSeconds();
+    this->_firerate_clock->restart();
+
+    return this->_shot_time_accumulator >= 1.0f / this->_firerate;
+}
+
+void Spaceship::shoot() {
+    this->_shooting = true;
+    this->_shot_time_accumulator = 0.0f;
 }

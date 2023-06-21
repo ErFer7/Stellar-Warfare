@@ -60,6 +60,7 @@ void Game::handle_event(StateMachine::Event event) {
                     _state = StateMachine::State::INGAME;
                 } else {
                     _state = StateMachine::State::PAUSED;
+                    _scene->set_skip_time(true);
                 }
             }
             unlock_state();

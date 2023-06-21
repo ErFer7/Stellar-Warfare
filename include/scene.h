@@ -21,9 +21,12 @@ class Scene final : public ThreadContainer {
     void render(sf::RenderWindow *window);
     void handle_player_control_event(StateMachine::Event event);
     void start_game();
+    void end_game();
     inline void lock_scene() { this->_scene_sem->p(); }
     inline void unlock_scene() { this->_scene_sem->v(); }
     inline Player *get_player() { return this->_player; }
+    inline void set_skip_time(bool skip_time) { this->_skip_time = skip_time; }
+    inline int should_skip_time() { return this->_skip_time; }
 
    private:
     static void update_scene(Scene *scene);
@@ -46,6 +49,8 @@ class Scene final : public ThreadContainer {
     int _width;
     int _height;
     int _score;
+    int _enemy_spawn_count;
+    bool _skip_time;
     sf::Texture *_player_texture;
     sf::Texture *_enemy_texture;
     sf::Texture *_bullet_texture;

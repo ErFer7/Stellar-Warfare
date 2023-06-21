@@ -4,8 +4,7 @@
 
 __USING_API
 
-Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 8.0f, PLAYER, 50) {
-
+Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 16.0f, PLAYER, 3, 2.0f) {
     this->set_graphics(texture);
     this->_current_event = StateMachine::Event::IDLE;
     this->_event_sem = new Semaphore(1);
@@ -32,30 +31,27 @@ void Player::update_behaviour(Player *player) {
             break;
         }
 
-        if (!player->can_move()) {
-            player->unlock();
-            Thread::yield();
-            continue;
+        if (player->can_move()) {
+            switch (event) {
+                case StateMachine::Event::UP:
+                    player->set_target_move(1, 0);
+                    break;
+                case StateMachine::Event::DOWN:
+                    player->set_target_move(-1, 0);
+                    break;
+                case StateMachine::Event::RIGHT:
+                    player->set_target_move(0, 90);
+                    break;
+                case StateMachine::Event::LEFT:
+                    player->set_target_move(0, -90);
+                    break;
+                default:
+                    break;
+            }
         }
 
-        switch (event) {
-            case StateMachine::Event::UP:
-                player->set_target_move(1, 0);
-                break;
-            case StateMachine::Event::DOWN:
-                player->set_target_move(-1, 0);
-                break;
-            case StateMachine::Event::RIGHT:
-                player->set_target_move(0, 90);
-                break;
-            case StateMachine::Event::LEFT:
-                player->set_target_move(0, -90);
-                break;
-            case StateMachine::Event::SPACE:
-                player->shoot();
-                break;
-            default:
-                break;
+        if (player->can_shoot() && event == StateMachine::Event::SPACE) {
+            player->shoot();
         }
         player->unlock();
 

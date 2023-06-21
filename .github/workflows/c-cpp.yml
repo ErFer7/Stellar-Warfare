@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install sfml
-      run: sudo apt install libsfml-dev
+      run: sudo apt install -y libsfml-dev
     - name: make
       run: make

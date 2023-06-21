@@ -4,7 +4,7 @@
 
 __USING_API
 
-Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 8.0f, PLAYER, 3) {
+Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 8.0f, PLAYER, 50) {
 
     this->set_graphics(texture);
     this->_current_event = StateMachine::Event::IDLE;

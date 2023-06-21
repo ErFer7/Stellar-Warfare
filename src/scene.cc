@@ -12,9 +12,12 @@ Scene::Scene() {
     this->_height = 30;
     this->_score = 0;
     this->_player = nullptr;
-    this->_enemies = new DynamicArray<Enemy *>(4);
-    this->_bullets = new DynamicArray<Bullet *>(10);
+    this->_enemies = new DynamicArray<Enemy *>(4, nullptr);
+    this->_bullets = new DynamicArray<Bullet *>(10, nullptr);
+    this->_enemy_spawn_times = new DynamicArray<float>(4, -1.0f);
+    this->_enemy_spawn_times->fill(-1.0f);
     this->_scene_sem = new Semaphore(1);
+    this->_clock = new sf::Clock();
 
     this->_player_texture = new sf::Texture();
     this->_enemy_texture = new sf::Texture();
@@ -74,7 +77,7 @@ void Scene::update_scene(Scene *scene) {
         scene->update_bullets_behavior();
 
         scene->lock_scene();
-        // TODO: Rotina de spawn de inimigos
+        scene->spawn_enemies();
         scene->update_all_entities();
         scene->unlock_scene();
 
@@ -93,13 +96,13 @@ void Scene::create_player() {
 }
 
 void Scene::create_enemy(int spot) {
-    if (spot == -1) {
-        spot = rand() % 4;
-    }
-
     int spawn_x;
     int spawn_y;
     int spawn_rotation;
+
+    if (spot == -1) {
+        spot = rand() % 4;
+    }
 
     switch (spot) {
         case 0:
@@ -126,7 +129,38 @@ void Scene::create_enemy(int spot) {
             break;
     }
 
-    // TODO: Checar se o spot está ocupado
+    if (this->_player) {
+        int x = this->_player->get_position()[0];
+        int y = this->_player->get_position()[1];
+
+        if (!check_corner_collision(spawn_x, spawn_y, x, y, 3, 3)) {
+            return;
+        }
+    }
+
+    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
+        Enemy *enemy = (*this->_enemies)[i];
+        if (enemy) {
+            int x = enemy->get_position()[0];
+            int y = enemy->get_position()[1];
+
+            if (!check_corner_collision(spawn_x, spawn_y, x, y, 3, 3)) {
+                return;
+            }
+        }
+    }
+
+    for (unsigned int i = 0; i < this->_bullets->size(); i++) {
+        Bullet *bullet = (*this->_bullets)[i];
+        if (bullet) {
+            int x = bullet->get_position()[0];
+            int y = bullet->get_position()[1];
+
+            if (!check_corner_collision(spawn_x, spawn_y, x, y, 3, 3)) {
+                return;
+            }
+        }
+    }
 
     unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, 8.0f, this->_enemy_texture));
     (*this->_enemies)[index]->set_index(index);
@@ -156,6 +190,7 @@ void Scene::destroy_enemy(unsigned int i) {
     (*this->_enemies)[i]->join();
     delete (*this->_enemies)[i];
     (*this->_enemies)[i] = nullptr;
+    this->_enemy_spawn_times->add(2.0f);
 }
 
 void Scene::update_all_entities() {
@@ -268,11 +303,11 @@ bool Scene::check_precise_collision(Entity *entity1, Entity *entity2, int new_x,
     int size2 = entity2->get_size();
 
     if (entity1->get_size() >= entity2->get_size()) {
-        if (check_corner_collision(new_x, new_y, x2, y2, size1, size2)) {
+        if (!check_corner_collision(new_x, new_y, x2, y2, size1, size2)) {
             return solve_entity_collision(entity1, entity2);
         }
     } else {
-        if (check_corner_collision(x2, y2, new_x, new_y, size2, size1)) {
+        if (!check_corner_collision(x2, y2, new_x, new_y, size2, size1)) {
             return solve_entity_collision(entity1, entity2);
         }
     }
@@ -309,7 +344,7 @@ bool Scene::check_corner_collision(int x1, int y1, int x2, int y2, int size1, in
     bool bottom_right = entity2_right >= entity1_left && entity2_right <= entity1_right &&
                         entity2_bottom >= entity1_top && entity2_bottom <= entity1_bottom;
 
-    return top_left || top_right || bottom_left || bottom_right;
+    return !(top_left || top_right || bottom_left || bottom_right);
 }
 
 bool Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y) {
@@ -422,6 +457,31 @@ void Scene::update_bullets_behavior() {
             bullet->update_behaviour();
         }
     }
+}
+
+void Scene::spawn_enemies() {
+    int spawn_count = 0;
+
+    for (unsigned int i = 0; i < this->_enemy_spawn_times->size(); i++) {
+        float time = (*this->_enemy_spawn_times)[i];
+
+        if (time > 0.0f) {
+            time -= this->_clock->getElapsedTime().asSeconds();
+
+            if (time <= 0.0f) {
+                spawn_count++;
+                time = -1.0f;
+            }
+
+            (*this->_enemy_spawn_times)[i] = time;
+        }
+    }
+
+    for (int i = 0; i < spawn_count; i++) {
+        create_enemy();
+    }
+
+    this->_clock->restart();
 }
 
 void Scene::render(sf::RenderWindow *window) {

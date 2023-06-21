@@ -15,12 +15,13 @@ class DynamicArray {
         this->_array = nullptr;
     }
 
-    DynamicArray(unsigned int initial_size) {
+    DynamicArray(unsigned int initial_size, T empty_value) {
         this->_size = initial_size;
+        this->empty_value = empty_value;
         this->_array = new T[this->_size];
 
         for (unsigned int i = 0; i < this->_size; i++) {
-            this->_array[i] = nullptr;
+            this->_array[i] = this->empty_value;
         }
     }
 
@@ -34,9 +35,15 @@ class DynamicArray {
     // Os valores são operados sem a verificação de intervalo
     T& operator[](unsigned int index) { return this->_array[index]; }
 
+    void fill(T value) {
+        for (unsigned int i = 0; i < this->_size; i++) {
+            this->_array[i] = value;
+        }
+    }
+
     unsigned int add(const T& value) {
         for (unsigned int i = 0; i < this->_size; i++) {
-            if (this->_array[i] == nullptr) {
+            if (this->_array[i] == this->empty_value) {
                 this->_array[i] = value;
                 return i;
             }
@@ -61,6 +68,7 @@ class DynamicArray {
 
    private:
     T* _array;
+    T empty_value;
     unsigned int _size;
 };
 

@@ -2,7 +2,7 @@
 
 __USING_API
 
-Bullet::Bullet(int x, int y, int rotation, Type type, sf::Texture *texture) : Entity(x, y, rotation, 64.0f, type, 1) {
+Bullet::Bullet(int x, int y, int rotation, Type type, sf::Texture *texture) : Entity(x, y, rotation, 32.0f, type, 1) {
     this->set_graphics(texture);
 }
 

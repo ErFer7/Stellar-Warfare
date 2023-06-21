@@ -40,6 +40,7 @@ class Scene final : public ThreadContainer {
     bool solve_boundary_collision(Entity *entity, int new_x, int new_y);
     bool solve_entity_collision(Entity *entity1, Entity *entity2);
     void update_bullets_behavior();
+    void spawn_enemies();
 
    private:
     int _width;
@@ -51,7 +52,9 @@ class Scene final : public ThreadContainer {
     Player *_player;
     DynamicArray<Enemy *> *_enemies;
     DynamicArray<Bullet *> *_bullets;
+    DynamicArray<float> *_enemy_spawn_times;
     Semaphore *_scene_sem;
+    sf::Clock *_clock;
 };
 
 #endif

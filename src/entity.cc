@@ -19,7 +19,7 @@ Entity::Entity(int x, int y, int rotation, float speed, Type type, int size) {
     this->_speed = speed;
     this->_time_accumulator = 0;
     this->_scale = 24;
-    this->_color = sf::Color(15, 45, 15, 255);
+    this->_color = sf::Color(136, 192, 112, 255);
     this->_type = type;
     this->_clock = new sf::Clock();
 }
@@ -36,7 +36,9 @@ Entity::~Entity() {
     }
 }
 
-void Entity::render(sf::RenderWindow *window) { window->draw(*this->_sprite); }
+void Entity::render(sf::RenderWindow *window) {
+    window->draw(*this->_sprite);
+}
 
 void Entity::set_graphics(sf::Texture *texture) {
     this->_sprite->setTexture(*texture);

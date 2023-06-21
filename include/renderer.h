@@ -1,6 +1,8 @@
 #ifndef renderer_h
 #define renderer_h
 
+#include <SFML/Graphics.hpp>
+
 #include "../os/include/traits.h"
 #include "game.h"
 #include "thread_container.h"

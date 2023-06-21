@@ -22,7 +22,7 @@ void Game::init() {
     _state = StateMachine::State::NONINITIALIZED;
     _window = new sf::RenderWindow(sf::VideoMode(1024, 768), "INE5412 Game");  // TODO: Conferir se a resolução é boa
     _window->setKeyRepeatEnabled(true);                                        // TODO: Conferir se o key repeat é bom
-    _window->setFramerateLimit(0);                                             // TODO: Conferir se o framerate é bom
+    _window->setFramerateLimit(60);                                             // TODO: Conferir se o framerate é bom
     _state_sem = new Semaphore(1);
 
     _input = new Input();

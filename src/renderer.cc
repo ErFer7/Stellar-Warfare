@@ -3,7 +3,7 @@
 __USING_API
 
 Renderer::Renderer() {
-    this->_background_color = sf::Color(155, 188, 15, 255);
+    this->_background_color = sf::Color(8, 24, 32, 255);
     this->thread = new Thread(render, this);
 }
 

@@ -36,7 +36,7 @@ class Entity {
     void reset_target_move();
 
    protected:
-    void set_graphics(sf::Texture *texture);
+    void set_graphics(sf::Texture *texture, float scale);
 
    private:
     void update_sprite();
@@ -48,7 +48,6 @@ class Entity {
     int _position[2];
     int _rotation;
     int _target_move[2];
-    int _scale;
     int _size;
     bool _has_target_move;
     float _speed;

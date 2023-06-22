@@ -4,18 +4,34 @@
 
 __USING_API
 
-Input::Input() { this->thread = new Thread(update_detection, this); }
+Input::Input() {
+    this->_internal_state = StateMachine::State::NONINITIALIZED;
+    this->_input_sem = new Semaphore(1);
+    this->thread = new Thread(update_detection, this);
+}
+
+Input::~Input() {
+    delete this->_input_sem;
+}
+
+void Input::handle_event(StateMachine::Event event) {
+    this->lock_input();
+    if (event == StateMachine::Event::Q_KEY) {
+        this->_internal_state = StateMachine::State::EXIT;
+    }
+    this->unlock_input();
+}
 
 void Input::update_detection(Input *input) {
     sf::RenderWindow *window = Game::get_window();
 
     while (true) {
-        Game::lock_state();
-        if (Game::get_state() == StateMachine::State::EXIT) {
-            Game::unlock_state();
+        input->lock_input();
+        if (input->get_internal_state() == StateMachine::State::EXIT) {
+            input->unlock_input();
             break;
         }
-        Game::unlock_state();
+        input->unlock_input();
 
         sf::Event event;
 

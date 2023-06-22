@@ -3,7 +3,7 @@
 __USING_API
 
 Bullet::Bullet(int x, int y, int rotation, Type type, sf::Texture *texture) : Entity(x, y, rotation, 32.0f, type, 1) {
-    this->set_graphics(texture);
+    this->set_graphics(texture, 1.0f);
 }
 
 void Bullet::update_behaviour() {

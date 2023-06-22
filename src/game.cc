@@ -10,20 +10,16 @@
 
 __USING_API
 
-StateMachine::State Game::_state;
 Input *Game::_input;
 Scene *Game::_scene;
 UserInterface *Game::_user_interface;
 Renderer *Game::_renderer;
-Semaphore *Game::_state_sem;
 sf::RenderWindow *Game::_window;
 
 void Game::init() {
-    _state = StateMachine::State::NONINITIALIZED;
     _window = new sf::RenderWindow(sf::VideoMode(1024, 768), "INE5412 Game");  // TODO: Conferir se a resolução é boa
     _window->setKeyRepeatEnabled(true);                                        // TODO: Conferir se o key repeat é bom
     _window->setFramerateLimit(60);                                            // TODO: Conferir se o framerate é bom
-    _state_sem = new Semaphore(1);
 
     _input = new Input();
     _scene = new Scene();
@@ -41,7 +37,6 @@ void Game::free() {
     _renderer->join();
     _window->close();
 
-    delete _state_sem;
     delete _input;
     delete _scene;
     delete _renderer;
@@ -49,39 +44,7 @@ void Game::free() {
 }
 
 void Game::handle_event(StateMachine::Event event) {
-    switch (event) {
-        case StateMachine::Event::P_KEY:
-            lock_state();
-            if (_state == StateMachine::State::NONINITIALIZED) {
-                _state = StateMachine::State::INGAME;
-                _scene->start_game();
-            } else if (_state != StateMachine::State::GAMEOVER) {
-                if (_state == StateMachine::State::PAUSED) {
-                    _state = StateMachine::State::INGAME;
-                } else {
-                    _state = StateMachine::State::PAUSED;
-                    _scene->set_skip_time(true);
-                }
-            }
-            unlock_state();
-            break;
-        case StateMachine::Event::R_KEY:
-            lock_state();
-            _state = StateMachine::State::INGAME;
-            unlock_state();
-            break;
-        case StateMachine::Event::PLAYER_DEATH:
-            lock_state();
-            _state = StateMachine::State::GAMEOVER;
-            unlock_state();
-            break;
-        case StateMachine::Event::Q_KEY:
-            lock_state();
-            _state = StateMachine::State::EXIT;
-            unlock_state();
-            break;
-        default:
-            _scene->handle_player_control_event(event);
-            break;
-    }
+    _input->handle_event(event);
+    _scene->handle_event(event);
+    _renderer->handle_event(event);
 }

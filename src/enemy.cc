@@ -5,8 +5,8 @@
 __USING_API
 
 Enemy::Enemy(int x, int y, float rotation, float speed, sf::Texture *texture)
-    : Spaceship(x, y, rotation, speed, ENEMY, 1, 1.0f) {
-    this->set_graphics(texture);
+    : Spaceship(x, y, rotation, speed, ENEMY, 1, 1.5f) {
+    this->set_graphics(texture, 1.0f);
     this->thread = new Thread(this->update_behaviour, this);
 }
 

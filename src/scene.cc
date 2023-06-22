@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include <iostream>
+#include <random>
 #include <stdexcept>
 
 __USING_API
@@ -19,11 +20,13 @@ Scene::Scene() {
     this->_bullets = new DynamicArray<Bullet *>(10, nullptr);
     this->_enemy_spawn_times = new DynamicArray<float>(4, -1.0f);
     this->_enemy_spawn_times->fill(-1.0f);
+    this->_internal_state = StateMachine::State::NONINITIALIZED;
 
     this->_clock = new sf::Clock();
     this->_player_texture = new sf::Texture();
     this->_enemy_texture = new sf::Texture();
-    this->_bullet_texture = new sf::Texture();
+    this->_cell_texture = new sf::Texture();
+    this->_background_cell = new sf::Sprite();
 
     if (!this->_player_texture->loadFromFile("assets/sprites/player.png")) {
         throw std::runtime_error("Could not load player texture");
@@ -33,9 +36,12 @@ Scene::Scene() {
         throw std::runtime_error("Could not load enemy texture");
     }
 
-    if (!this->_bullet_texture->loadFromFile("assets/sprites/bullet.png")) {
-        throw std::runtime_error("Could not load bullet texture");
+    if (!this->_cell_texture->loadFromFile("assets/sprites/cell.png")) {
+        throw std::runtime_error("Could not load cell texture");
     }
+
+    this->_background_cell->setTexture(*this->_cell_texture);
+    this->_background_cell->setColor(sf::Color(8, 24, 32, 255));
 
     this->thread = new Thread(update_scene, this);
 }
@@ -43,24 +49,26 @@ Scene::Scene() {
 Scene::~Scene() {
     if (this->_player) {
         delete this->_player;
-        this->_player = nullptr;
     }
 
-    if (this->_scene_sem) {
-        delete this->_scene_sem;
-        this->_scene_sem = nullptr;
-    }
+    delete this->_scene_sem;
+    delete this->_enemies;
+    delete this->_bullets;
+    delete this->_enemy_spawn_times;
+    delete this->_clock;
+    delete this->_player_texture;
+    delete this->_enemy_texture;
+    delete this->_cell_texture;
+    delete this->_background_cell;
 }
 
 void Scene::start_game() {
-    this->lock_scene();
     this->_score = 0;
     this->create_player();
 
     for (int i = 0; i < 4; i++) {
         this->create_enemy(i);
     }
-    this->unlock_scene();
 }
 
 void Scene::end_game() {
@@ -91,16 +99,16 @@ void Scene::end_game() {
 
 void Scene::update_scene(Scene *scene) {
     while (true) {
-        Game::lock_state();
-        if (Game::get_state() == StateMachine::State::EXIT) {
-            Game::unlock_state();
+        scene->lock_scene();
+        if (scene->get_internal_state() == StateMachine::State::EXIT) {
+            scene->unlock_scene();
             break;
-        } else if (Game::get_state() != StateMachine::State::INGAME) {
-            Game::unlock_state();
+        } else if (scene->get_internal_state() != StateMachine::State::INGAME) {
+            scene->unlock_scene();
             Thread::yield();
             continue;
         }
-        Game::unlock_state();
+        scene->unlock_scene();
 
         scene->update_bullets_behavior();
 
@@ -199,7 +207,7 @@ void Scene::create_enemy(int spot) {
 }
 
 void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
-    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_bullet_texture));
+    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture));
     (*this->_bullets)[index]->set_index(index);
 }
 
@@ -419,16 +427,18 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
                 enemy->lock();
                 destroy_enemy(enemy->get_index());
                 destroy_player();
-                end_game();
+                this->unlock_scene();
                 Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                 return false;
             } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
+                // TODO: Resolver deadlock
                 destroy_bullet(entity2->get_index());
                 player = static_cast<Player *>(entity1);
                 player->apply_damage(1);
 
                 if (player->get_health() <= 0) {
                     destroy_player();
+                    this->unlock_scene();
                     Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                     return false;
                 }
@@ -439,7 +449,7 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
                 destroy_enemy(entity1->get_index());
                 static_cast<Player *>(entity2)->lock();
                 destroy_player();
-                end_game();
+                this->unlock_scene();
                 Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                 return false;
             } else if (entity2_type == Entity::Type::ENEMY) {
@@ -474,7 +484,7 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
 
                 if (player->get_health() <= 0) {
                     destroy_player();
-                    end_game();
+                    this->unlock_scene();
                     Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                 } else {
                     player->unlock();
@@ -504,8 +514,8 @@ void Scene::update_bullets_behavior() {
 
 void Scene::spawn_enemies() {
     for (unsigned int i = 0; i < this->_enemy_spawn_times->size(); i++) {
-        if (this->should_skip_time()) {
-            this->set_skip_time(false);
+        if (this->_skip_time) {
+            this->_skip_time = false;
             break;
         }
 
@@ -530,8 +540,60 @@ void Scene::spawn_enemies() {
     this->_clock->restart();
 }
 
+void Scene::handle_event(StateMachine::Event event) {
+    this->lock_scene();
+    switch (event) {
+        case StateMachine::Event::P_KEY:
+            if (this->_internal_state == StateMachine::State::NONINITIALIZED) {
+                this->start_game();
+                this->_internal_state = StateMachine::State::INGAME;
+            } else if (this->_internal_state != StateMachine::State::GAMEOVER) {
+                if (this->_internal_state == StateMachine::State::PAUSED) {
+                    this->_internal_state = StateMachine::State::INGAME;
+                } else {
+                    this->_skip_time = true;
+                    this->_internal_state = StateMachine::State::PAUSED;
+                }
+            }
+            break;
+        case StateMachine::Event::R_KEY:
+            if (this->_internal_state != StateMachine::State::NONINITIALIZED) {
+                this->end_game();
+                this->start_game();
+                this->_internal_state = StateMachine::State::INGAME;
+            }
+            break;
+        case StateMachine::Event::PLAYER_DEATH:
+            this->end_game();
+            this->_internal_state = StateMachine::State::GAMEOVER;
+            break;
+        case StateMachine::Event::Q_KEY:
+            this->end_game();
+            this->_internal_state = StateMachine::State::EXIT;
+            break;
+        default:
+            if (this->_player) {
+                this->_player->set_control_event(event);
+            }
+            break;
+    }
+
+    this->unlock_scene();
+}
+
 void Scene::render(sf::RenderWindow *window) {
     this->lock_scene();  // TODO: Verificar se é necessário bloquear a cena para renderizar
+    // TODO: Renderizar o background de forma mais eficiente
+    for (int i = 0; i < this->_height; i++) {
+        for (int j = 0; j < this->_width; j++) {
+            float base_range = 5;
+            int noise = random() % (int)base_range - ceil(base_range * 0.5f);
+            this->_background_cell->setColor(sf::Color(8 + noise, 24 + noise, 32 + noise, 255));
+            this->_background_cell->setPosition(j * 16, i * 16);
+            window->draw(*this->_background_cell);
+        }
+    }
+
     if (this->_player) {
         this->_player->render(window);
     }
@@ -550,13 +612,5 @@ void Scene::render(sf::RenderWindow *window) {
         }
     }
 
-    this->unlock_scene();
-}
-
-void Scene::handle_player_control_event(StateMachine::Event event) {
-    this->lock_scene();
-    if (this->_player) {
-        this->_player->set_control_event(event);
-    }
     this->unlock_scene();
 }

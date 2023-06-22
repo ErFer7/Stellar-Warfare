@@ -5,17 +5,14 @@
 __USING_API
 
 Player::Player(int x, int y, sf::Texture *texture) : Spaceship(x, y, 0.0f, 32.0f, PLAYER, 3, 2.0f) {
-    this->set_graphics(texture);
+    this->set_graphics(texture, 1.0f);
     this->_current_event = StateMachine::Event::IDLE;
     this->_event_sem = new Semaphore(1);
     this->thread = new Thread(this->update_behaviour, this);
 }
 
 Player::~Player() {
-    if (this->_event_sem) {
-        delete this->_event_sem;
-        this->_event_sem = nullptr;
-    }
+    delete this->_event_sem;
 }
 
 void Player::update_behaviour(Player *player) {

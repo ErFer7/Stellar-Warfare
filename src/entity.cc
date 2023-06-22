@@ -10,7 +10,6 @@ Entity::Entity(int x, int y, int rotation, float speed, Type type, int size) {
     this->_id = _id_counter++;
     this->_index = -1;
     this->_time_accumulator = 0;
-    this->_scale = 24;
     this->_target_move[0] = 0;
     this->_target_move[1] = 0;
     this->_position[0] = x;
@@ -38,10 +37,10 @@ Entity::~Entity() {
 
 void Entity::render(sf::RenderWindow *window) { window->draw(*this->_sprite); }
 
-void Entity::set_graphics(sf::Texture *texture) {
+void Entity::set_graphics(sf::Texture *texture, float scale) {
     this->_sprite->setTexture(*texture);
     this->_sprite->setColor(this->_color);
-    this->_sprite->setScale(this->_scale, this->_scale);
+    this->_sprite->setScale(scale, scale);
     this->_sprite->setOrigin(this->_sprite->getLocalBounds().width * 0.5, this->_sprite->getLocalBounds().height * 0.5);
 
     update_sprite();
@@ -76,8 +75,11 @@ void Entity::reset_target_move() {
 }
 
 void Entity::update_sprite() {
-    int x = this->_position[0] * this->_scale + this->_scale * 0.5;
-    int y = this->_position[1] * this->_scale + this->_scale * 0.5;
+    float pixel_x = this->_sprite->getLocalBounds().width / this->_size;
+    float pixel_y = this->_sprite->getLocalBounds().height / this->_size;
+
+    int x = pixel_x * (this->_position[0] + 0.5f);
+    int y = pixel_y * (this->_position[1] + 0.5f);
 
     this->_sprite->setPosition(x, y);
     this->_sprite->setRotation(this->_rotation);

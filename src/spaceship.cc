@@ -13,15 +13,8 @@ Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int h
 }
 
 Spaceship::~Spaceship() {
-    if (this->_sem) {
-        delete this->_sem;
-        this->_sem = nullptr;
-    }
-
-    if (this->_firerate_clock) {
-        delete this->_firerate_clock;
-        this->_firerate_clock = nullptr;
-    }
+    delete this->_sem;
+    delete this->_firerate_clock;
 }
 
 void Spaceship::kill() { this->_health = 0; }

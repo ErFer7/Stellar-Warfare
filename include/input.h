@@ -1,8 +1,8 @@
 #ifndef input_h
 #define input_h
 
-#include "../os/include/traits.h"
 #include "../os/include/semaphore.h"
+#include "../os/include/traits.h"
 #include "game.h"
 #include "state_machine.h"
 #include "thread_container.h"

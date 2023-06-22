@@ -15,6 +15,8 @@ Scene::Scene() {
     this->_player = nullptr;
     this->_skip_time = false;
     this->_enemy_spawn_count = 4;
+    this->_enemy_kill_count = 0;
+    this->_level = 1;
     this->_scene_sem = new Semaphore(1);
     this->_enemies = new DynamicArray<Enemy *>(4, nullptr);
     this->_bullets = new DynamicArray<Bullet *>(10, nullptr);
@@ -64,6 +66,11 @@ Scene::~Scene() {
 
 void Scene::start_game() {
     this->_score = 0;
+    this->_level = 1;
+    this->_enemy_spawn_count = 4;
+    this->_enemy_kill_count = 0;
+    this->_enemy_spawn_times->fill(-1.0f);
+
     this->create_player();
 
     for (int i = 0; i < 4; i++) {
@@ -72,8 +79,6 @@ void Scene::start_game() {
 }
 
 void Scene::end_game() {
-    this->_score = 0;
-
     if (this->_player) {
         this->_player->lock();
         this->destroy_player();
@@ -97,6 +102,23 @@ void Scene::end_game() {
     }
 }
 
+void Scene::update_enemies_speed() {
+    if (this->_enemy_kill_count >= 4) {
+        this->_enemy_kill_count = 0;
+        this->_level++;
+    }
+
+    for (unsigned int i = 0; i < this->_enemies->size(); i++) {
+        Enemy *enemy = (*this->_enemies)[i];
+
+        if (enemy) {
+            enemy->lock();
+            enemy->set_speed(this->level_speed());
+            enemy->unlock();
+        }
+    }
+}
+
 void Scene::update_scene(Scene *scene) {
     while (true) {
         scene->lock_scene();
@@ -115,6 +137,7 @@ void Scene::update_scene(Scene *scene) {
         scene->lock_scene();
         scene->spawn_enemies();
         scene->update_all_entities();
+        scene->update_enemies_speed();
         scene->unlock_scene();
 
         Thread::yield();
@@ -201,7 +224,7 @@ void Scene::create_enemy(int spot) {
         }
     }
 
-    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, 8.0f, this->_enemy_texture));
+    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture));
     (*this->_enemies)[index]->set_index(index);
     this->_enemy_spawn_count--;
 }
@@ -458,6 +481,7 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
                 destroy_enemy(entity1->get_index());
                 destroy_bullet(entity2->get_index());
                 this->_score += 100;
+                this->_enemy_kill_count++;
                 return false;
             }
             break;
@@ -468,6 +492,7 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
                 enemy->lock();
                 destroy_enemy(enemy->get_index());
                 this->_score += 100;
+                this->_enemy_kill_count++;
                 return false;
             } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
                 destroy_bullet(entity1->get_index());
@@ -557,8 +582,7 @@ void Scene::handle_event(StateMachine::Event event) {
             }
             break;
         case StateMachine::Event::R_KEY:
-            if (this->_internal_state != StateMachine::State::NONINITIALIZED) {
-                this->end_game();
+            if (this->_internal_state == StateMachine::State::GAMEOVER) {
                 this->start_game();
                 this->_internal_state = StateMachine::State::INGAME;
             }

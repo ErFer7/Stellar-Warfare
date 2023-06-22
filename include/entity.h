@@ -34,6 +34,7 @@ class Entity {
     void render(sf::RenderWindow *window);
     void set_target_move(int x, int y);
     void reset_target_move();
+    void set_speed(float speed) { this->_speed = speed; }
 
    protected:
     void set_graphics(sf::Texture *texture, float scale);

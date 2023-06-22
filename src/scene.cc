@@ -11,7 +11,7 @@ __USING_API
 Scene::Scene() {
     this->_width = 30;
     this->_height = 30;
-    this->_scale = 1.5f;
+    this->_scale = 1.0f;
     this->_scene_offset[0] = 24;
     this->_scene_offset[1] = 24;
     this->_score = 0;

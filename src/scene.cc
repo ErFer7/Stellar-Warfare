@@ -106,7 +106,7 @@ void Scene::end_game() {
 }
 
 void Scene::update_enemies_speed() {
-    if (this->_enemy_kill_count >= 4) {
+    if (this->_enemy_kill_count >= 4 && this->_level < 3) {
         this->_enemy_kill_count = 0;
         this->_level++;
     }
@@ -246,14 +246,16 @@ void Scene::create_enemy(int spot) {
         }
     }
 
-    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture,
+    unsigned int index =
+        this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture,
                                       this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
     (*this->_enemies)[index]->set_index(index);
     this->_enemy_spawn_count--;
 }
 
 void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
-    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture, this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
+    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture, this->_scale,
+                                                        this->_scene_offset[0], this->_scene_offset[1]));
     (*this->_bullets)[index]->set_index(index);
 }
 
@@ -297,7 +299,6 @@ void Scene::update_all_entities() {
             solve_collisions(this->_player);
         }
 
-        // É necessário checar se o jogador ainda existe, pois ele pode ter sido destruído
         if (this->_player) {
             this->_player->unlock();
         }
@@ -306,6 +307,8 @@ void Scene::update_all_entities() {
     // Processa os inimigos
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
         Enemy *enemy = (*this->_enemies)[i];
+        bool result = true;
+
         if (enemy) {
             enemy->lock();
             if (enemy->get_health() <= 0) {
@@ -324,7 +327,14 @@ void Scene::update_all_entities() {
             }
 
             if (enemy->has_target_move()) {
-                solve_collisions(enemy);
+                result = solve_collisions(enemy);
+
+                if ((*this->_enemies)[i]) {
+                    int player_x = this->_player->get_position()[0];
+                    int player_y = this->_player->get_position()[1];
+
+                    enemy->tell_result(player_x, player_y, result);
+                }
             }
 
             // A verificação é feita assim pois o ponteiro enemy pode não ser nulo após a destruição
@@ -343,7 +353,7 @@ void Scene::update_all_entities() {
     }
 }
 
-void Scene::solve_collisions(Entity *entity) {
+bool Scene::solve_collisions(Entity *entity) {
     int new_rotation = entity->get_rotation();
     int target_move_x = entity->get_target_move()[0];
     int target_move_y = entity->get_target_move()[1];
@@ -363,12 +373,12 @@ void Scene::solve_collisions(Entity *entity) {
     entity->reset_target_move();
 
     if (!solve_boundary_collision(entity, new_x, new_y)) {
-        return;
+        return false;
     }
 
     if (this->_player && entity->get_id() != this->_player->get_id()) {
         if (!check_precise_collision(entity, this->_player, new_x, new_y)) {
-            return;
+            return false;
         }
     }
 
@@ -376,7 +386,7 @@ void Scene::solve_collisions(Entity *entity) {
         Enemy *enemy = (*this->_enemies)[i];
         if (enemy && entity->get_id() != enemy->get_id()) {
             if (!check_precise_collision(entity, enemy, new_x, new_y)) {
-                return;
+                return false;
             }
         }
     }
@@ -385,12 +395,13 @@ void Scene::solve_collisions(Entity *entity) {
         Bullet *bullet = (*this->_bullets)[i];
         if (bullet && entity->get_id() != bullet->get_id()) {
             if (!check_precise_collision(entity, bullet, new_x, new_y)) {
-                return;
+                return false;
             }
         }
     }
 
     entity->set_position_and_rotation(new_x, new_y, new_rotation);
+    return true;
 }
 
 bool Scene::check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y) {

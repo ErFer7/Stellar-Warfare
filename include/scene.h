@@ -40,7 +40,7 @@ class Scene final : public ThreadContainer {
     void destroy_bullet(unsigned int i);
     void destroy_enemy(unsigned int i);
     void update_all_entities();
-    void solve_collisions(Entity *entity);
+    bool solve_collisions(Entity *entity);
     void update_bullets_behavior();
     void spawn_enemies();
     void start_game();

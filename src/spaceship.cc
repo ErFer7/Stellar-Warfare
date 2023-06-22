@@ -2,8 +2,8 @@
 
 __USING_API
 
-Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate)
-    : Entity(x, y, rotation, speed, type, 3) {
+Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate, float scale, int scene_offset_x, int scene_offset_y)
+    : Entity(x, y, rotation, speed, type, 3, scale, scene_offset_x, scene_offset_y) {
     this->_shooting = false;
     this->_shot_time_accumulator = 0.0f;
     this->_health = health;

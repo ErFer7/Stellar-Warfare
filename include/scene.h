@@ -46,6 +46,7 @@ class Scene final : public ThreadContainer {
     void start_game();
     void end_game();
     void update_enemies_speed();
+    void render_background(sf::RenderWindow *window, int noise_range);
 
    private:
     int _width;
@@ -54,6 +55,8 @@ class Scene final : public ThreadContainer {
     int _enemy_spawn_count;
     int _enemy_kill_count;
     int _level;
+    int _scene_offset[2];
+    float _scale;
     bool _skip_time;
     sf::Texture *_player_texture;
     sf::Texture *_enemy_texture;

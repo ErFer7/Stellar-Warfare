@@ -17,7 +17,7 @@ class Entity {
         this->_sprite = nullptr;
         this->_clock = nullptr;
     }
-    Entity(int x, int y, int rotation, float speed, Type type, int size);
+    Entity(int x, int y, int rotation, float speed, Type type, int size, float scale, int scene_offset_x, int scene_offset_y);
     ~Entity();
 
     inline unsigned int get_id() { return this->_id; }
@@ -37,7 +37,7 @@ class Entity {
     void set_speed(float speed) { this->_speed = speed; }
 
    protected:
-    void set_graphics(sf::Texture *texture, float scale);
+    void set_graphics(sf::Texture *texture);
 
    private:
     void update_sprite();
@@ -50,7 +50,9 @@ class Entity {
     int _rotation;
     int _target_move[2];
     int _size;
+    int _scene_offset[2];
     bool _has_target_move;
+    float _scale;
     float _speed;
     float _time_accumulator;
     Type _type;

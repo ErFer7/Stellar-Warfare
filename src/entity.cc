@@ -6,7 +6,7 @@ __USING_API
 
 unsigned int Entity::_id_counter = 0;
 
-Entity::Entity(int x, int y, int rotation, float speed, Type type, int size) {
+Entity::Entity(int x, int y, int rotation, float speed, Type type, int size, float scale, int scene_offset_x, int scene_offset_y) {
     this->_id = _id_counter++;
     this->_index = -1;
     this->_time_accumulator = 0;
@@ -14,10 +14,13 @@ Entity::Entity(int x, int y, int rotation, float speed, Type type, int size) {
     this->_target_move[1] = 0;
     this->_position[0] = x;
     this->_position[1] = y;
+    this->_scene_offset[0] = scene_offset_x;
+    this->_scene_offset[1] = scene_offset_y;
     this->_rotation = rotation;
     this->_size = size;
     this->_speed = speed;
     this->_type = type;
+    this->_scale = scale;
     this->_sprite = new sf::Sprite();
     this->_color = sf::Color(136, 192, 112, 255);
     this->_clock = new sf::Clock();
@@ -37,10 +40,10 @@ Entity::~Entity() {
 
 void Entity::render(sf::RenderWindow *window) { window->draw(*this->_sprite); }
 
-void Entity::set_graphics(sf::Texture *texture, float scale) {
+void Entity::set_graphics(sf::Texture *texture) {
     this->_sprite->setTexture(*texture);
     this->_sprite->setColor(this->_color);
-    this->_sprite->setScale(scale, scale);
+    this->_sprite->setScale(this->_scale, this->_scale);
     this->_sprite->setOrigin(this->_sprite->getLocalBounds().width * 0.5, this->_sprite->getLocalBounds().height * 0.5);
 
     update_sprite();
@@ -75,11 +78,11 @@ void Entity::reset_target_move() {
 }
 
 void Entity::update_sprite() {
-    float pixel_x = this->_sprite->getLocalBounds().width / this->_size;
-    float pixel_y = this->_sprite->getLocalBounds().height / this->_size;
+    float pixel_x = (this->_sprite->getLocalBounds().width * this->_scale) / this->_size;
+    float pixel_y = (this->_sprite->getLocalBounds().height * this->_scale) / this->_size;
 
-    int x = pixel_x * (this->_position[0] + 0.5f);
-    int y = pixel_y * (this->_position[1] + 0.5f);
+    int x = pixel_x * (this->_position[0] + 0.5f) + this->_scene_offset[0];
+    int y = pixel_y * (this->_position[1] + 0.5f) + this->_scene_offset[1];
 
     this->_sprite->setPosition(x, y);
     this->_sprite->setRotation(this->_rotation);

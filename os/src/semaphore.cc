@@ -50,7 +50,6 @@ void Semaphore::wakeup_all()
     {
         Thread::wakeup(&sleeping_queue);
     }
-    // Thread::yield();
 }
 
 Semaphore::~Semaphore()

@@ -11,6 +11,9 @@ __USING_API
 Scene::Scene() {
     this->_width = 30;
     this->_height = 30;
+    this->_scale = 1.5f;
+    this->_scene_offset[0] = 24;
+    this->_scene_offset[1] = 24;
     this->_score = 0;
     this->_player = nullptr;
     this->_skip_time = false;
@@ -43,7 +46,7 @@ Scene::Scene() {
     }
 
     this->_background_cell->setTexture(*this->_cell_texture);
-    this->_background_cell->setColor(sf::Color(8, 24, 32, 255));
+    this->_background_cell->setScale(this->_scale, this->_scale);
 
     this->thread = new Thread(update_scene, this);
 }
@@ -119,6 +122,24 @@ void Scene::update_enemies_speed() {
     }
 }
 
+void Scene::render_background(sf::RenderWindow *window, int noise_range) {
+    for (int i = 0; i < this->_height; i++) {
+        for (int j = 0; j < this->_width; j++) {
+            int noise = random() % (int)noise_range - ceil(noise_range * 0.5f);
+
+            float width = this->_background_cell->getLocalBounds().width;
+            float height = this->_background_cell->getLocalBounds().height;
+            int x = j * width * this->_scale + this->_scene_offset[0];
+            int y = i * height * this->_scale + this->_scene_offset[1];
+
+            this->_background_cell->setColor(sf::Color(8 + noise, 24 + noise, 32 + noise, 255));
+            this->_background_cell->setPosition(x, y);
+
+            window->draw(*this->_background_cell);
+        }
+    }
+}
+
 void Scene::update_scene(Scene *scene) {
     while (true) {
         scene->lock_scene();
@@ -154,7 +175,8 @@ void Scene::create_player() {
     int x = this->_width / 2;
     int y = this->_height / 2;
 
-    this->_player = new Player(x, y, this->_player_texture);
+    this->_player =
+        new Player(x, y, this->_player_texture, this->_scale, this->_scene_offset[0], this->_scene_offset[1]);
 }
 
 void Scene::create_enemy(int spot) {
@@ -224,13 +246,14 @@ void Scene::create_enemy(int spot) {
         }
     }
 
-    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture));
+    unsigned int index = this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture,
+                                      this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
     (*this->_enemies)[index]->set_index(index);
     this->_enemy_spawn_count--;
 }
 
 void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
-    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture));
+    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture, this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
     (*this->_bullets)[index]->set_index(index);
 }
 
@@ -607,16 +630,7 @@ void Scene::handle_event(StateMachine::Event event) {
 
 void Scene::render(sf::RenderWindow *window) {
     this->lock_scene();  // TODO: Verificar se é necessário bloquear a cena para renderizar
-    // TODO: Renderizar o background de forma mais eficiente
-    for (int i = 0; i < this->_height; i++) {
-        for (int j = 0; j < this->_width; j++) {
-            float base_range = 5;
-            int noise = random() % (int)base_range - ceil(base_range * 0.5f);
-            this->_background_cell->setColor(sf::Color(8 + noise, 24 + noise, 32 + noise, 255));
-            this->_background_cell->setPosition(j * 16, i * 16);
-            window->draw(*this->_background_cell);
-        }
-    }
+    this->render_background(window, 5);
 
     if (this->_player) {
         this->_player->render(window);

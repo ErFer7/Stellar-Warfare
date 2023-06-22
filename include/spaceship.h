@@ -17,7 +17,7 @@ class Spaceship : public Entity, public ThreadContainer {
         this->_sem = nullptr;
         this->_firerate_clock = nullptr;
     }
-    Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate);
+    Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate, float scale, int scene_offset_x, int scene_offset_y);
     ~Spaceship();
 
     inline int get_health() { return this->_health; }

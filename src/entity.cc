@@ -6,7 +6,15 @@ __USING_API
 
 unsigned int Entity::_id_counter = 0;
 
-Entity::Entity(int x, int y, int rotation, float speed, Type type, int size, float scale, int scene_offset_x, int scene_offset_y) {
+Entity::Entity(int x,
+               int y,
+               int rotation,
+               float speed,
+               Type type,
+               int size,
+               float scale,
+               int scene_offset_x,
+               int scene_offset_y) {
     this->_id = _id_counter++;
     this->_index = -1;
     this->_time_accumulator = 0;
@@ -38,9 +46,11 @@ Entity::~Entity() {
     }
 }
 
-void Entity::render(sf::RenderWindow *window) { window->draw(*this->_sprite); }
+void Entity::render(sf::RenderWindow* window) {
+    window->draw(*this->_sprite);
+}
 
-void Entity::set_graphics(sf::Texture *texture) {
+void Entity::set_graphics(sf::Texture* texture) {
     this->_sprite->setTexture(*texture);
     this->_sprite->setColor(this->_color);
     this->_sprite->setScale(this->_scale, this->_scale);

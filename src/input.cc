@@ -22,8 +22,8 @@ void Input::handle_event(StateMachine::Event event) {
     this->unlock_input();
 }
 
-void Input::update_detection(Input *input) {
-    sf::RenderWindow *window = Game::get_window();
+void Input::update_detection(Input* input) {
+    sf::RenderWindow* window = Game::get_window();
 
     while (true) {
         input->lock_input();

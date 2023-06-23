@@ -38,7 +38,7 @@ struct Traits<Debug> : public Traits<void>
 template <>
 struct Traits<CPU> : public Traits<void>
 {
-    static const unsigned int STACK_SIZE = 64000;
+    static const unsigned int STACK_SIZE = 128000;
     static const bool debugged = false;
 };
 

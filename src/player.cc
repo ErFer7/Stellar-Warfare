@@ -4,7 +4,7 @@
 
 __USING_API
 
-Player::Player(int x, int y, sf::Texture *texture, float scale, int scene_offset_x, int scene_offset_y)
+Player::Player(int x, int y, sf::Texture* texture, float scale, int scene_offset_x, int scene_offset_y)
     : Spaceship(x, y, 0.0f, 32.0f, PLAYER, 3, 4.0f, scale, scene_offset_x, scene_offset_y) {
     this->set_graphics(texture);
     this->_current_event = StateMachine::Event::IDLE;
@@ -12,9 +12,11 @@ Player::Player(int x, int y, sf::Texture *texture, float scale, int scene_offset
     this->thread = new Thread(this->update_behaviour, this);
 }
 
-Player::~Player() { delete this->_event_sem; }
+Player::~Player() {
+    delete this->_event_sem;
+}
 
-void Player::update_behaviour(Player *player) {
+void Player::update_behaviour(Player* player) {
     while (true) {
         player->_event_sem->p();
         StateMachine::Event event = player->_current_event;

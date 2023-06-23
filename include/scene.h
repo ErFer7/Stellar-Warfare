@@ -19,20 +19,20 @@ class Scene final : public ThreadContainer {
     Scene();
     ~Scene();
 
-    void render(sf::RenderWindow *window);
+    void render(sf::RenderWindow* window);
     void handle_event(StateMachine::Event event);
 
    private:
-    static void update_scene(Scene *scene);
+    static void update_scene(Scene* scene);
     inline void lock_scene() { this->_scene_sem->p(); }
     inline void unlock_scene() { this->_scene_sem->v(); }
-    inline Player *get_player() { return this->_player; }
+    inline Player* get_player() { return this->_player; }
     inline StateMachine::State get_internal_state() { return this->_internal_state; }
     inline float level_speed() { return 4.0f * this->_level; }
-    bool check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y);
+    bool check_precise_collision(Entity* entity1, Entity* entity2, int new_x, int new_y);
     bool check_corner_collision(int x1, int y1, int x2, int y2, int size1, int size2);
-    bool solve_boundary_collision(Entity *entity, int new_x, int new_y);
-    bool solve_entity_collision(Entity *entity1, Entity *entity2);
+    bool solve_boundary_collision(Entity* entity, int new_x, int new_y);
+    bool solve_entity_collision(Entity* entity1, Entity* entity2);
     void create_player();
     void create_enemy(int spot = -1);
     void create_bullet(int x, int y, int rotation, Entity::Type type);
@@ -40,13 +40,13 @@ class Scene final : public ThreadContainer {
     void destroy_bullet(unsigned int i);
     void destroy_enemy(unsigned int i);
     void update_all_entities();
-    bool solve_collisions(Entity *entity);
+    bool solve_collisions(Entity* entity);
     void update_bullets_behavior();
     void spawn_enemies();
     void start_game();
     void end_game();
     void update_enemies_speed();
-    void render_background(sf::RenderWindow *window, int noise_range);
+    void render_background(sf::RenderWindow* window, int noise_range);
 
    private:
     int _width;
@@ -58,16 +58,16 @@ class Scene final : public ThreadContainer {
     int _scene_offset[2];
     float _scale;
     bool _skip_time;
-    sf::Texture *_player_texture;
-    sf::Texture *_enemy_texture;
-    sf::Texture *_cell_texture;
-    sf::Sprite *_background_cell;
-    sf::Clock *_clock;
-    Player *_player;
-    DynamicArray<Enemy *> *_enemies;
-    DynamicArray<Bullet *> *_bullets;
-    DynamicArray<float> *_enemy_spawn_times;
-    Semaphore *_scene_sem;
+    sf::Texture* _player_texture;
+    sf::Texture* _enemy_texture;
+    sf::Texture* _cell_texture;
+    sf::Sprite* _background_cell;
+    sf::Clock* _clock;
+    Player* _player;
+    DynamicArray<Enemy*>* _enemies;
+    DynamicArray<Bullet*>* _bullets;
+    DynamicArray<float>* _enemy_spawn_times;
+    Semaphore* _scene_sem;
     StateMachine::State _internal_state;
 };
 

@@ -4,7 +4,13 @@
 
 __USING_API
 
-Enemy::Enemy(int x, int y, int rotation, float speed, sf::Texture *texture, float scale, int scene_offset_x,
+Enemy::Enemy(int x,
+             int y,
+             int rotation,
+             float speed,
+             sf::Texture* texture,
+             float scale,
+             int scene_offset_x,
              int scene_offset_y)
     : Spaceship(x, y, rotation, speed, ENEMY, 1, 1.5f, scale, scene_offset_x, scene_offset_y) {
     this->_algorithm = random() % 5;
@@ -19,7 +25,7 @@ Enemy::Enemy(int x, int y, int rotation, float speed, sf::Texture *texture, floa
 
 Enemy::~Enemy() {}
 
-void Enemy::update_behaviour(Enemy *enemy) {
+void Enemy::update_behaviour(Enemy* enemy) {
     while (true) {
         enemy->lock();
         if (enemy->get_health() <= 0) {
@@ -200,6 +206,12 @@ void Enemy::hunter_alg() {
 
         this->set_target_move(x, y);
         this->set_last_move(x, y);
+    }
+
+    if (this->can_shoot()) {
+        if (random() % 512 == 0) {
+            this->shoot();
+        }
     }
 }
 

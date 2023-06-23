@@ -2,7 +2,16 @@
 
 __USING_API
 
-Spaceship::Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate, float scale, int scene_offset_x, int scene_offset_y)
+Spaceship::Spaceship(int x,
+                     int y,
+                     float rotation,
+                     float speed,
+                     Type type,
+                     int health,
+                     float firerate,
+                     float scale,
+                     int scene_offset_x,
+                     int scene_offset_y)
     : Entity(x, y, rotation, speed, type, 3, scale, scene_offset_x, scene_offset_y) {
     this->_shooting = false;
     this->_shot_time_accumulator = 0.0f;
@@ -17,7 +26,9 @@ Spaceship::~Spaceship() {
     delete this->_firerate_clock;
 }
 
-void Spaceship::kill() { this->_health = 0; }
+void Spaceship::kill() {
+    this->_health = 0;
+}
 
 int Spaceship::get_shot_spawn_x() {
     int diff_x = 0;

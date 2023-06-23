@@ -9,9 +9,7 @@ Renderer::Renderer() {
     this->thread = new Thread(render, this);
 }
 
-Renderer::~Renderer() {
-    delete this->_renderer_sem;
-}
+Renderer::~Renderer() { delete this->_renderer_sem; }
 
 void Renderer::handle_event(StateMachine::Event event) {
     this->lock_renderer();

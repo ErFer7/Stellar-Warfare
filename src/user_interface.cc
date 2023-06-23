@@ -32,8 +32,7 @@ UserInterface::UserInterface() {
         throw std::runtime_error("Could not load font");
     }
 
-    this->_border =
-        new Image(Image::TOP_LEFT, 0, 0, window_width, window_height, this->_border_texture, sf::Color::White, 4.0f);
+    this->_border = new Image(Image::TOP_LEFT, 0, 0, window_width, window_height, this->_border_texture, sf::Color::White, 4.0f);
 
     this->_title = new Text(Text::TOP_RIGHT, -232, 32, window_width, window_height, this->_font, default_color,
                             default_shadow_color, 32, "Stellar\nWarfare");

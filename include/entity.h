@@ -17,14 +17,7 @@ class Entity {
         this->_sprite = nullptr;
         this->_clock = nullptr;
     }
-    Entity(int x,
-           int y,
-           int rotation,
-           float speed,
-           Type type,
-           int size,
-           float scale,
-           int scene_offset_x,
+    Entity(int x, int y, int rotation, float speed, Type type, int size, float scale, int scene_offset_x,
            int scene_offset_y);
     ~Entity();
 

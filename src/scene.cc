@@ -56,9 +56,9 @@ Scene::~Scene() {
         delete this->_player;
     }
 
-    delete this->_scene_sem;
     delete this->_enemies;
     delete this->_bullets;
+    delete this->_scene_sem;
     delete this->_enemy_spawn_times;
     delete this->_clock;
     delete this->_player_texture;

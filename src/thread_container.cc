@@ -2,9 +2,7 @@
 
 __USING_API
 
-ThreadContainer::ThreadContainer() {
-    this->thread = nullptr;
-}
+ThreadContainer::ThreadContainer() { this->thread = nullptr; }
 
 ThreadContainer::~ThreadContainer() {
     if (this->thread) {

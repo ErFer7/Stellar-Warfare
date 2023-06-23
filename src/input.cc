@@ -10,9 +10,7 @@ Input::Input() {
     this->thread = new Thread(update_detection, this);
 }
 
-Input::~Input() {
-    delete this->_input_sem;
-}
+Input::~Input() { delete this->_input_sem; }
 
 void Input::handle_event(StateMachine::Event event) {
     this->lock_input();

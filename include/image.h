@@ -10,13 +10,7 @@ __USING_API
 
 class Image final : public Widget {
    public:
-    Image(Alignment alignment,
-          int x,
-          int y,
-          int window_width,
-          int window_height,
-          sf::Texture* texture,
-          sf::Color color,
+    Image(Alignment alignment, int x, int y, int window_width, int window_height, sf::Texture* texture, sf::Color color,
           float scale);
     ~Image();
     void update(sf::Texture* texture);

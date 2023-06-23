@@ -12,9 +12,7 @@ Player::Player(int x, int y, sf::Texture* texture, float scale, int scene_offset
     this->thread = new Thread(this->update_behaviour, this);
 }
 
-Player::~Player() {
-    delete this->_event_sem;
-}
+Player::~Player() { delete this->_event_sem; }
 
 void Player::update_behaviour(Player* player) {
     while (true) {

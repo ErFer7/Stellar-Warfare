@@ -1,6 +1,6 @@
 CC = g++
 LDLIBS = -lsfml-graphics -lsfml-window -lsfml-system -lm -lpng
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -ggdb3
 OS_SRC_DIR = os/src
 OS_LIB_DIR = os/include
 GAME_SRC_DIR = src

@@ -1,0 +1,20 @@
+@startuml
+left to right direction
+skinparam packageStyle rect
+skinparam actorStyle awesome
+actor Player
+rectangle Game {
+    Player -- (Start game)
+    Player -- (Pause game)
+    Player -- (Quit game)
+    Player -- (Move)
+    (Move) .down.> (Player hit) : <<include>>
+    (Player hit) .right.> (Player loses) : <<include>>
+    Player -- (Shoot)
+    (Shoot) .down.> (Enemy hit) : <<include>>
+    (Enemy hit) .right.> (Player wins) : <<include>>
+    (Start game) .down.> (Display score) : <<include>>
+    Player -- (Restart game)
+    (Player loses) .right.> (Restart game) : <<include>>
+}
+@enduml

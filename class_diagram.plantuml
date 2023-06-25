@@ -1,0 +1,338 @@
+@startuml
+class Bullet {
+    + Bullet(int x, int y, int rotation, Type type, sf::Texture* texture, float scale, int scene_offset_x,int scene_offset_y)
+    + ~Bullet()
+    + update_behaviour() : void
+}
+
+class DynamicArray {
+    - _array : T*
+    - empty_value : T
+    - _size : unsigned int
+
+    + DynamicArray()
+    + DynamicArray(unsigned int initial_size, T empty_value)
+    + ~DynamicArray()
+    + fill(T value) : void
+    + add(const T& value) : unsigned int
+    + size() : unsigned int
+}
+
+class Enemy {
+    - _algorithm : int
+    - _last_player_position[2] : int
+    - _last_move[2] : int
+    - _successfully_moved : bool
+
+    + Enemy(int x, int y, int rotation, float speed, sf::Texture* texture, float scale, int scene_offset_x,int scene_offset_y)
+    + ~Enemy()
+    + update_behaviour(Enemy* enemy) : void
+    + tell_result(int player_x, int player_y, bool successfully_moved) : void
+    
+    - get_algorithm() : int 
+    - get_last_player_position() : int* 
+    - successfully_moved() : bool
+    - get_last_move() : int*
+    - set_last_move(int x, int y) : void
+    - random_alg() : void
+    - spinner_alg() : void
+    - walker_alg() : void 
+    - hunter_alg() : void
+    - shooter_alg() : void
+}
+
+class Entity {
+    - _id_counter : static unsigned int 
+    - _id : unsigned int 
+    - _index : unsigned int 
+    - _position[2] : int
+    - _rotation : int
+    - _target_move[2] : int
+    - _size : int
+    - _scene_offset[2] : int
+    - _has_target_move : bool
+    - _scale : float
+    - _speed : float
+    - _time_accumulator : float
+    - _type : Type;
+    - _color : sf::Color
+    - _sprite : sf::Sprite
+    - _clock : sf::Clock* 
+
+    + Entity()
+    + Entity(int x, int y, int rotation, float speed, Type type, int size, float scale, int scene_offset_x,int scene_offset_y)
+    + ~Entity()
+    + get_id() : unsigned int
+    + get_index() : unsigned int
+    + get_position() : int* 
+    + get_target_move() : int* 
+    + get_size() : int
+    + get_rotation() : int 
+    + has_target_move() : bool 
+    + set_index(unsigned int index) : void
+    + get_type() : Type
+    + can_move() : bool
+    + set_position_and_rotation(int x, int y, int rotation) : void
+    + render(sf::RenderWindow* window) : void
+    + set_target_move(int x, int y) : void
+    + reset_target_move() : void
+    + set_speed(float speed) : void
+    # set_graphics(sf::Texture* texture) : void
+    - update_sprite() : void
+}
+
+class Game {
+    - _window : sf::RenderWindow*
+    - _input : Input*
+    - _scene : Scene*
+    - _renderer : Renderer*
+    - _user_interface : UserInterface*
+
+    + Game()
+    + ~Game()
+    + init() : void
+    + run() : void
+    + free() : void
+    + handle_event(StateMachine::Event event) : void
+    + get_window() : sf::RenderWindow* 
+    + get_scene() : Scene* 
+    + get_user_interface() : UserInterface* 
+}
+
+class Image {
+    - _sprite : sf::Sprite*
+
+    + Image(Alignment alignment, int x, int y, int window_width, int window_height, sf::Texture* texture, sf::Color color,float scale)
+    + ~Image()
+    + update(sf::Texture* texture) : void
+    + render(sf::RenderWindow* window) : void
+}
+
+class Input {
+    - _internal_state : StateMachine::State
+    - _input_sem : Sempahore*
+
+    + Input()
+    + ~Input()
+    + handle_event(StateMachine::Event event) : void
+
+    - lock_input() : void 
+    - unlock_input() : void
+    - get_internal_state() : StateMachine::State
+    - update_detection(Input* input) : void
+}
+
+class Player {
+    - _current_event : StateMachine::Event
+    - _event_sem : Semaphore* 
+
+    + Player() 
+    + Player(int x, int y, sf::Texture* texture, float scale, int scene_offset_x, int scene_offset_y)
+    + ~Player()
+    + update_behaviour(Player* player) : void
+    + set_control_event(StateMachine::Event event) : void
+}
+
+class Renderer {
+    - _background_color : sf::Color
+    - _internal_state : StateMachine::State 
+    - _renderer_sem : Semaphore* 
+
+    + Renderer()
+    + ~Renderer()
+    + get_background_color() : sf::Color 
+    + handle_event(StateMachine::Event event) : void
+
+    - lock_renderer() : void
+    - unlock_renderer() : void
+    - get_internal_state() : StateMachine::State 
+    - render(Renderer* renderer) : void
+}
+
+class Scene {
+    - _width : int
+    - _height : int
+    - _score : int
+    - _enemy_spawn_count : int
+    - _enemy_kill_count : int
+    - _level : int
+    - _scene_offset[2] : int
+    - _scale : float
+    - _skip_time : bool
+    - _player_texture : sf::Texture*
+    - _enemy_texture : sf::Texture*
+    - _cell_texture : sf::Texture*
+    - _background_cell : sf::Sprite*
+    - _clock : sf::Clock*
+    - _player : Player*
+    - _enemies : DynamicArray<Enemy*>*
+    - _bullets : DynamicArray<Bullet*>*
+    - _enemy_spawn_times : DynamicArray<float>*
+    - _scene_sem : Semaphore*
+    - _internal_state : StateMachine::State
+
+    + Scene()
+    + ~Scene()
+    + render(sf::RenderWindow* window) : void
+    + handle_event(StateMachine::Event event) : void
+
+    - update_scene(Scene* scene) : void
+    - lock_scene() : void
+    - unlock_scene() : void
+    - get_player() : Player* 
+    - get_internal_state() : StateMachine::State
+    - level_speed() : float
+    - check_precise_collision(Entity* entity1, Entity* entity2, int new_x, int new_y) : bool
+    - check_corner_collision(int x1, int y1, int x2, int y2, int size1, int size2) : bool
+    - solve_boundary_collision(Entity* entity, int new_x, int new_y) : bool
+    - solve_entity_collision(Entity* entity1, Entity* entity2) : bool
+    - create_player() : void
+    - create_enemy(int spot = -1) : void
+    - create_bullet(int x, int y, int rotation, Entity::Type type) : void
+    - destroy_player() :void
+    - destroy_bullet(unsigned int i) : void
+    - destroy_enemy(unsigned int i) : void
+    - update_all_entities() : void
+    - solve_collisions(Entity* entity) : bool
+    - update_bullets_behavior() : void
+    - spawn_enemies() : void
+    - start_game() : void
+    - end_game() : void
+    - update_enemies_speed() : void
+    - render_background(sf::RenderWindow* window, int noise_range) : void
+}
+
+Class Spaceship {
+    - _health : int
+    - _firerate : float
+    - _shot_time_accumulator : float
+    - _shooting : bool
+    - _sem : Semaphore*
+    - _firerate_clock : sf::Clock*
+
+    + Spaceship()
+    + Spaceship(int x, int y, float rotation, float speed, Type type, int health, float firerate, float scale,int scene_offset_x, int scene_offset_y)
+    + ~Spaceship()
+    + get_health() : int
+    + is_shooting() : bool
+    + lock() : void
+    + unlock() : void
+    + reset_shooting() : void
+    + apply_damage(int damage) : void
+    + get_shot_spawn_x() : int
+    + get_shot_spawn_y() : int
+    + can_shoot() : bool
+    + kill() : void
+    + shoot() : void
+}
+
+Class StateMachine {
+    + State : enum
+    + Event : enum
+    + StateMachine()
+    + ~StateMachine()
+}
+
+Class Text {
+    - _text : sf::Text* 
+    - _shadow : sf::Text* 
+
+    + Text(Alignment alignment, int x, int y, int window_width, int window_height, sf::Font* font, sf::Color color,sf::Color shadow_color, int size, sf::String text)
+    + ~Text()
+    + update(sf::String text) : void
+    + render(sf::RenderWindow* window) : void
+}
+
+class ThreadContainer {
+    # thread : Thread*
+
+    + ThreadContainer()
+    + ~ThreadContainer()
+    + get_thread() : Thread*
+    + join() : void
+    + suspend() : void
+    + resume() : void
+}
+
+class UserInterface {
+    - _window_size[2] : int
+    - _border_texture : sf::Texture*
+    - _full_heart_texture : sf::Texture* 
+    - _empty_heart_texture : sf::Texture* 
+    - _font : sf::Font*
+    - _border : Image* 
+    - _heart1 : Image*
+    - _heart2 : Image*
+    - _heart3 : Image* 
+    - _title : Text*
+    - _state_info : Text*
+    - _score_label : Text*
+    - _score : Text*
+    - _health_label : Text*
+    - _level_label : Text*
+    - _level : Text*
+    - _info : Text*
+    - _authors : Text*
+    - _user_interface_sem : Semaphore*
+    - _internal_state : StateMachine::State
+
+    + UserInterface()
+    + ~UserInterface()
+    + render(sf::RenderWindow* window) : void
+    + handle_event(StateMachine::Event event) : void
+    + update_score(int score) : void
+    + update_health(int health) : void
+    + update_level(int speed) : void
+}
+
+class Widget {
+    # position[2] : int
+    
+    + Alignment : enum
+    + Widget(Alignment alignment, int x, int y, int window_width, int window_height)
+    + ~Widget()
+    + render(sf::RenderWindow* window) : void
+}
+
+class Semaphore {}
+
+class Thread {}
+
+' Inheritance relations
+Bullet --|> Entity
+Enemy --|> Spaceship
+Image --|> Widget
+Input --|> ThreadContainer
+Player --|> Spaceship
+Renderer --|> ThreadContainer
+Scene --|> ThreadContainer
+Spaceship --|> Entity
+Spaceship --|> ThreadContainer
+Text --|> Widget
+
+' Dependency relations
+Scene ..> Entity
+
+' Composition relations
+Game *-- Scene
+Game *-- UserInterface
+Game *-- Input
+Game *-- Renderer
+
+' Aggregation relations
+Input o-- StateMachine
+Input o-- Semaphore
+Player o-- StateMachine
+Player o-- Semaphore
+Renderer o-- StateMachine
+Renderer o-- Semaphore
+Scene o-- Player
+Scene o-- DynamicArray
+Scene o-- StateMachine
+Scene o-- Semaphore
+Spaceship o-- Semaphore
+ThreadContainer o-- Thread
+UserInterface o-- StateMachine
+UserInterface o-- Semaphore
+
+@enduml

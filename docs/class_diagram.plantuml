@@ -1,4 +1,6 @@
-@startuml
+@startuml Diagrama de classes - Stellar Warfare
+skinparam linetype ortho
+left to right direction
 class Bullet {
     + Bullet(int x, int y, int rotation, Type type, sf::Texture* texture, float scale, int scene_offset_x,int scene_offset_y)
     + ~Bullet()
@@ -7,7 +9,7 @@ class Bullet {
 
 class DynamicArray {
     - _array : T*
-    - empty_value : T
+    - _empty_value : T
     - _size : unsigned int
 
     + DynamicArray()
@@ -42,19 +44,19 @@ class Enemy {
 }
 
 class Entity {
-    - _id_counter : static unsigned int 
+    {static} - _id_counter : static unsigned int 
     - _id : unsigned int 
     - _index : unsigned int 
-    - _position[2] : int
-    - _rotation : int
+    # _position[2] : int
+    # _rotation : int
     - _target_move[2] : int
-    - _size : int
+    # _size : int
     - _scene_offset[2] : int
     - _has_target_move : bool
     - _scale : float
     - _speed : float
     - _time_accumulator : float
-    - _type : Type;
+    - _type : Type
     - _color : sf::Color
     - _sprite : sf::Sprite
     - _clock : sf::Clock* 
@@ -79,6 +81,14 @@ class Entity {
     + set_speed(float speed) : void
     # set_graphics(sf::Texture* texture) : void
     - update_sprite() : void
+}
+
+enum Type {
+    VOID
+    PLAYER
+    ENEMY
+    PLAYER_BULLET
+    ENEMY_BULLET
 }
 
 class Game {
@@ -227,10 +237,29 @@ Class Spaceship {
 }
 
 Class StateMachine {
-    + State : enum
-    + Event : enum
     + StateMachine()
     + ~StateMachine()
+}
+
+enum "State" as StateMachine::State {
+    NONINITIALIZED
+    INGAME
+    PAUSED
+    GAMEOVER
+    EXIT
+}
+
+enum Event {
+    IDLE
+    UP
+    DOWN
+    LEFT
+    RIGHT
+    SPACE
+    P_KEY
+    Q_KEY
+    R_KEY
+    PLAYER_DEATH
 }
 
 Class Text {
@@ -287,16 +316,124 @@ class UserInterface {
 
 class Widget {
     # position[2] : int
-    
-    + Alignment : enum
+
     + Widget(Alignment alignment, int x, int y, int window_width, int window_height)
     + ~Widget()
     + render(sf::RenderWindow* window) : void
 }
 
-class Semaphore {}
+enum Alignment {
+    TOP_LEFT
+    TOP
+    TOP_RIGHT
+    LEFT
+    CENTER
+    RIGHT
+    BOTTOM_LEFT
+    BOTTOM
+    BOTTOM_RIGHT
+}
 
-class Thread {}
+class CPU #FFAAAA {
+    {static} + switch_context(Context *from, Context *to) : void
+    {static} + finc(int number) : int
+    {static} + fdec(int number) : int
+}
+
+class Context #FFAAAA {
+    {static} - STACK_SIZE : unsigned int
+    + Context()
+    + Context(void (*func)(Tn...), Tn... an)
+    + ~Context()
+    + save() : void
+    + load() : void
+}
+
+class Ordered_Queue <<Typedef>> #FFAAAA {}
+
+class Semaphore #FFAAAA {
+    + Semaphore(int v = 1)
+    + ~Semaphore()
+    + p() : void
+    + v() : void
+    - finc(int number) : int
+    - fdec(int number) : int
+    - sleep() : void
+    - wakeup() : void
+    - wakeup_all() : void
+    - value: int
+    - sleeping_queue: Ordered_Queue
+}
+
+class System #FFAAAA {
+    {static} + init(void (*main)(void *)) : void
+}
+
+class Thread #FFAAAA {
+    + Thread()
+    + Thread(void (*entry)(Tn...), Tn... an)
+    + ~Thread()
+    {static} + running() : Thread*
+    {static} + switch_context(Thread *prev, Thread *next) : int
+    + thread_exit(int exit_code) : void
+    + id() : int
+    {static} + dispatcher() : void
+    {static} + init(void (*main)(void *)) : void
+    {static} + yield() : void
+    + context() : Context*
+    + join() : int
+    + suspend() : void
+    + resume() : void
+    {static} + sleep(Ordered_Queue *sleeping_queue) : void
+    {static} + wakeup(Ordered_Queue *sleeping_queue) : void
+    + get_link() : Ordered_Queue::Element
+    - _id: int
+    - _context: Context*
+    {static} - _running: Thread*
+    {static} - _main: Thread
+    {static} - _main_context: Context*
+    {static} - _dispatcher: Thread
+    {static} - _ready: Ordered_Queue
+    {static} - _link: Ordered_Queue::Element
+    {static} - _state: State
+    {static} - _id_counter: int
+    - _exit_code: int
+    {static} _suspended: Ordered_Queue
+    - _waiting_join: Thread*
+}
+
+enum "State" as Thread::State #FFAAAA {
+    RUNNING
+    READY
+    FINISHING
+    SUSPENDED
+    WAITING
+}
+
+struct Traits #FFAAAA {
+    + debugged : const bool
+    + STACK_SIZE : const unsigned int
+    + error : const bool
+    + warning : const bool
+    + info : const bool
+    + trace : const bool
+}
+
+class Color #AAFFAA {}
+
+class Sprite #AAFFAA {}
+
+class Clock #AAFFAA {}
+
+class RenderWindow #AAFFAA {}
+
+class Texture #AAFFAA {}
+
+class "Text" as sf::Text #AAFFAA {}
+
+class Font #AAFFAA {}
+
+class String #AAFFAA {}
 
 ' Inheritance relations
 Bullet --|> Entity
@@ -310,29 +447,104 @@ Spaceship --|> Entity
 Spaceship --|> ThreadContainer
 Text --|> Widget
 
-' Dependency relations
-Scene ..> Entity
+Bullet -- Texture
 
-' Composition relations
-Game *-- Scene
-Game *-- UserInterface
-Game *-- Input
-Game *-- Renderer
+Enemy -- Texture
 
-' Aggregation relations
-Input o-- StateMachine
-Input o-- Semaphore
-Player o-- StateMachine
-Player o-- Semaphore
-Renderer o-- StateMachine
-Renderer o-- Semaphore
-Scene o-- Player
-Scene o-- DynamicArray
-Scene o-- StateMachine
-Scene o-- Semaphore
-Spaceship o-- Semaphore
-ThreadContainer o-- Thread
-UserInterface o-- StateMachine
-UserInterface o-- Semaphore
+DynamicArray -- Enemy
+DynamicArray -- Bullet
+
+Entity "1" *-- "1" Color
+Entity "1" *-- "1" Sprite
+Entity "1" *-- "1" Clock
+Entity -- Type
+Entity -- RenderWindow
+
+Game "1" *-- "1" RenderWindow
+Game "1" *-- "1" Input
+Game "1" *-- "1" Scene
+Game "1" *-- "1" Renderer
+Game "1" *-- "1" UserInterface
+Game -- Event
+
+Image "1" *-- "1" Sprite
+Image -- Texture
+Image -- RenderWindow
+
+Input -- StateMachine::State
+Input "1" *-- "1" Semaphore
+Input -- Event
+
+Player -- Event
+Player "1" *-- "1" Semaphore
+Player -- Texture
+
+Renderer "1" *-- "1" Color
+Renderer -- StateMachine::State
+Renderer "1" *-- "1" Semaphore
+Renderer -- Event
+
+Scene "1" *-- "1" Semaphore
+Scene "3" *-- "1" Texture
+Scene "1" *-- "1" Sprite
+Scene "1" *-- "1" Clock
+Scene "0..1" *-- "1" Player
+Scene "0..4" *-- "1" Enemy
+Scene "0..*" *-- "1" Bullet
+Scene "3" *-- "1" DynamicArray
+Scene "1" *-- "1" Semaphore
+Scene -- StateMachine::State
+Scene -- Entity
+Scene -- Event
+Scene -- Type
+Scene -- RenderWindow
+
+Spaceship "1" *-- "1" Semaphore
+Spaceship "1" *-- "1" Clock
+
+Text "2" *-- "1" sf::Text
+Text -- Font
+Text -- String
+Text -- RenderWindow
+Text -- Color
+
+ThreadContainer "1" *-- "1" Thread
+
+UserInterface "3" *-- "1" Texture
+UserInterface "1" *-- "1" Font
+UserInterface "4" *-- "1" Image
+UserInterface "9" *-- "1" Text
+UserInterface "1" *-- "1" Semaphore
+UserInterface -- StateMachine::State
+UserInterface -- Event
+UserInterface -- RenderWindow
+
+Widget -- Alignment
+
+CPU +-- Context
+
+Semaphore "1" *-- "1" Ordered_Queue
+Semaphore "0..*" o-- "0..1" Thread
+
+System -- Thread
+
+Thread "1" *-- "1" Context
+Thread -- Ordered_Queue
+Thread -- Thread::State
+
+Context -- Traits
+
+Ordered_Queue -- Thread
+
+skinparam legendBackgroundColor #ffffff
+legend
+
+|= field |= method |=  |
+|  <img:http://s.plantuml.com/private-field.png>     |   <img:http://s.plantuml.com/private-method.png>     | private |
+|  <img:http://s.plantuml.com/protected-field.png>   |   <img:http://s.plantuml.com/protected-method.png>   | protected |
+|  <img:http://s.plantuml.com/package-private-field.png>     |   <img:http://s.plantuml.com/package-private-method.png>    | package private |
+|  <img:http://s.plantuml.com/public-field.png>     |   <img:http://s.plantuml.com/public-method.png>     | public |
+
+endlegend
 
 @enduml

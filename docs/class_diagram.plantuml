@@ -451,8 +451,8 @@ Bullet -- Texture
 
 Enemy -- Texture
 
-DynamicArray -- Enemy
-DynamicArray -- Bullet
+DynamicArray "1" o-- "0..4" Enemy
+DynamicArray "1" o-- "0..*" Bullet
 
 Entity "1" *-- "1" Color
 Entity "1" *-- "1" Sprite
@@ -488,10 +488,10 @@ Scene "1" *-- "1" Semaphore
 Scene "3" *-- "1" Texture
 Scene "1" *-- "1" Sprite
 Scene "1" *-- "1" Clock
-Scene "0..1" *-- "1" Player
-Scene "0..4" *-- "1" Enemy
-Scene "0..*" *-- "1" Bullet
-Scene "3" *-- "1" DynamicArray
+Scene "1" *-- "0..1" Player
+Scene "1" *-- "0..4" Enemy
+Scene "1" *-- "0..*" Bullet
+Scene "1" *-- "3" DynamicArray
 Scene "1" *-- "1" Semaphore
 Scene -- StateMachine::State
 Scene -- Entity
@@ -502,7 +502,9 @@ Scene -- RenderWindow
 Spaceship "1" *-- "1" Semaphore
 Spaceship "1" *-- "1" Clock
 
-Text "2" *-- "1" sf::Text
+StateMachine -- StateMachine::State
+
+Text "1" *-- "2" sf::Text
 Text -- Font
 Text -- String
 Text -- RenderWindow
@@ -510,10 +512,10 @@ Text -- Color
 
 ThreadContainer "1" *-- "1" Thread
 
-UserInterface "3" *-- "1" Texture
+UserInterface "1" *-- "3" Texture
 UserInterface "1" *-- "1" Font
-UserInterface "4" *-- "1" Image
-UserInterface "9" *-- "1" Text
+UserInterface "1" *-- "4" Image
+UserInterface "1" *-- "9" Text
 UserInterface "1" *-- "1" Semaphore
 UserInterface -- StateMachine::State
 UserInterface -- Event
@@ -524,17 +526,16 @@ Widget -- Alignment
 CPU +-- Context
 
 Semaphore "1" *-- "1" Ordered_Queue
-Semaphore "0..*" o-- "0..1" Thread
+Semaphore "0..1" o-- "0..*" Thread
 
 System -- Thread
 
 Thread "1" *-- "1" Context
-Thread -- Ordered_Queue
 Thread -- Thread::State
 
 Context -- Traits
 
-Ordered_Queue -- Thread
+Ordered_Queue "0..*" o-- "1" Thread
 
 skinparam legendBackgroundColor #ffffff
 legend

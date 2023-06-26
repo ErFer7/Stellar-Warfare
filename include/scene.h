@@ -1,6 +1,8 @@
 #ifndef scene_h
 #define scene_h
 
+#include <math.h>
+
 #include "../os/include/semaphore.h"
 #include "../os/include/thread.h"
 #include "../os/include/traits.h"
@@ -27,7 +29,7 @@ class Scene final : public ThreadContainer {
     inline void lock_scene() { this->_scene_sem->p(); }
     inline void unlock_scene() { this->_scene_sem->v(); }
     inline StateMachine::State get_internal_state() { return this->_internal_state; }
-    inline float level_speed() { return 4.0f * this->_level; }
+    inline float level_speed() { return 2.0f * expf(0.693147f * this->_level); }  // x = 1 => 4, x = 2 => 8, x = 3 => 16
     bool check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y);
     bool check_corner_collision(int x1, int y1, int x2, int y2, int size1, int size2);
     bool solve_boundary_collision(Entity *entity, int new_x, int new_y);

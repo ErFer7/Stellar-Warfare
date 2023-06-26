@@ -15,11 +15,11 @@ class DynamicArray {
 
     DynamicArray(unsigned int initial_size, T empty_value) {
         this->_size = initial_size;
-        this->empty_value = empty_value;
+        this->_empty_value = empty_value;
         this->_array = new T[this->_size];
 
         for (unsigned int i = 0; i < this->_size; i++) {
-            this->_array[i] = this->empty_value;
+            this->_array[i] = this->_empty_value;
         }
     }
 
@@ -40,7 +40,7 @@ class DynamicArray {
 
     unsigned int add(const T &value) {
         for (unsigned int i = 0; i < this->_size; i++) {
-            if (this->_array[i] == this->empty_value) {
+            if (this->_array[i] == this->_empty_value) {
                 this->_array[i] = value;
                 return i;
             }
@@ -65,7 +65,7 @@ class DynamicArray {
 
    private:
     T *_array;
-    T empty_value;
+    T _empty_value;
     unsigned int _size;
 };
 

@@ -35,4 +35,5 @@ debug/
 obj/
 Grupo_H.zip
 .vscode
-.valgrind
+minimal.supp
+*.log

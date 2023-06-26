@@ -26,16 +26,16 @@ class Game {
     static void run();
     static void free();
     static void handle_event(StateMachine::Event event);
-    static inline sf::RenderWindow* get_window() { return _window; }
-    static inline Scene* get_scene() { return _scene; }
-    static inline UserInterface* get_user_interface() { return _user_interface; }
+    static inline sf::RenderWindow *get_window() { return _window; }
+    static inline Scene *get_scene() { return _scene; }
+    static inline UserInterface *get_user_interface() { return _user_interface; }
 
    private:
-    static sf::RenderWindow* _window;
-    static Input* _input;
-    static Scene* _scene;
-    static Renderer* _renderer;
-    static UserInterface* _user_interface;
+    static sf::RenderWindow *_window;
+    static Input *_input;
+    static Scene *_scene;
+    static Renderer *_renderer;
+    static UserInterface *_user_interface;
 };
 
 #endif

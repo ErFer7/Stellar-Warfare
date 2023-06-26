@@ -13,7 +13,8 @@ class Widget {
 
     Widget(Alignment alignment, int x, int y, int window_width, int window_height);
     ~Widget() {}
-    virtual void render(sf::RenderWindow* window) {}
+
+    virtual void render(sf::RenderWindow *window) {}
 
    protected:
     int position[2];

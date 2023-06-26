@@ -8,4 +8,4 @@ Autores: Eric Fernandes Evaristo e Victor Hugo Bonacina Pergher
 
 ## Instruções
 
-Compile o projeto com o comando `make`. O executável será gerado na pasta **bin**.
+Compile o projeto com o comando `make`. O executável será gerado na pasta **bin**. Rode o jogo com o comando `"./bin/Spaceship game"`.

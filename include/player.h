@@ -11,14 +11,15 @@ __USING_API
 class Player final : public Spaceship {
    public:
     Player() { this->_event_sem = nullptr; }
-    Player(int x, int y, sf::Texture* texture, float scale, int scene_offset_x, int scene_offset_y);
+    Player(int x, int y, sf::Texture *texture, float scale, int scene_offset_x, int scene_offset_y);
     ~Player();
-    static void update_behaviour(Player* player);
+
+    static void update_behaviour(Player *player);
     void set_control_event(StateMachine::Event event);
 
    private:
-    StateMachine::Event _current_event;  // Compartilhada com Input (W)
-    Semaphore* _event_sem;
+    StateMachine::Event _current_event;
+    Semaphore *_event_sem;
 };
 
 #endif

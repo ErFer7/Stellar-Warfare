@@ -9,6 +9,7 @@ class StateMachine {
    public:
     enum State { NONINITIALIZED, INGAME, PAUSED, GAMEOVER, EXIT };
     enum Event { IDLE, UP, DOWN, LEFT, RIGHT, SPACE, P_KEY, Q_KEY, R_KEY, PLAYER_DEATH };
+
     StateMachine() {}
     ~StateMachine() {}
 };

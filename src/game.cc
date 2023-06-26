@@ -10,11 +10,11 @@
 
 __USING_API
 
-Input* Game::_input;
-Scene* Game::_scene;
-UserInterface* Game::_user_interface;
-Renderer* Game::_renderer;
-sf::RenderWindow* Game::_window;
+Input *Game::_input;
+Scene *Game::_scene;
+UserInterface *Game::_user_interface;
+Renderer *Game::_renderer;
+sf::RenderWindow *Game::_window;
 
 void Game::init() {
     _window = new sf::RenderWindow(sf::VideoMode(1032, 768), "Stellar Warfare");

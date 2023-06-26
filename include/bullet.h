@@ -8,7 +8,13 @@ __USING_API
 
 class Bullet : public Entity {
    public:
-    Bullet(int x, int y, int rotation, Type type, sf::Texture* texture, float scale, int scene_offset_x,
+    Bullet(int x,
+           int y,
+           int rotation,
+           Type type,
+           sf::Texture *texture,
+           float scale,
+           int scene_offset_x,
            int scene_offset_y);
     ~Bullet() {}
 

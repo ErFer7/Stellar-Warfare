@@ -4,7 +4,13 @@
 
 __USING_API
 
-Enemy::Enemy(int x, int y, int rotation, float speed, sf::Texture* texture, float scale, int scene_offset_x,
+Enemy::Enemy(int x,
+             int y,
+             int rotation,
+             float speed,
+             sf::Texture *texture,
+             float scale,
+             int scene_offset_x,
              int scene_offset_y)
     : Spaceship(x, y, rotation, speed, ENEMY, 1, 1.5f, scale, scene_offset_x, scene_offset_y) {
     this->_algorithm = random() % 5;
@@ -19,7 +25,7 @@ Enemy::Enemy(int x, int y, int rotation, float speed, sf::Texture* texture, floa
 
 Enemy::~Enemy() {}
 
-void Enemy::update_behaviour(Enemy* enemy) {
+void Enemy::update_behaviour(Enemy *enemy) {
     while (true) {
         enemy->lock();
         if (enemy->get_health() <= 0) {
@@ -91,7 +97,7 @@ void Enemy::spinner_alg() {
         int x = 0;
         int y = 0;
 
-        switch (this->get_rotation()) {
+        switch (this->rotation) {
             case 0:
                 x = 1;
                 break;
@@ -172,21 +178,18 @@ void Enemy::hunter_alg() {
         int x = 0;
         int y = 0;
 
-        int pos_x = this->get_position()[0];
-        int pos_y = this->get_position()[1];
-
         int player_x = this->get_last_player_position()[0];
         int player_y = this->get_last_player_position()[1];
 
-        if (player_x > pos_x) {
+        if (player_x > this->position[0]) {
             x = 1;
-        } else if (player_x < pos_x) {
+        } else if (player_x < this->position[0]) {
             x = -1;
         }
 
-        if (player_y > pos_y) {
+        if (player_y > this->position[1]) {
             y = 1;
-        } else if (player_y < pos_y) {
+        } else if (player_y < this->position[1]) {
             y = -1;
         }
 
@@ -210,9 +213,6 @@ void Enemy::hunter_alg() {
 }
 
 void Enemy::shooter_alg() {
-    int pos_x = this->get_position()[0];
-    int pos_y = this->get_position()[1];
-
     int player_x = this->get_last_player_position()[0];
     int player_y = this->get_last_player_position()[1];
 
@@ -220,14 +220,14 @@ void Enemy::shooter_alg() {
         int x = 0;
         int y = 0;
 
-        if (player_x > pos_x) {
+        if (player_x > this->position[0]) {
             x = 1;
-        } else if (player_x < pos_x) {
+        } else if (player_x < this->position[0]) {
             x = -1;
-        } else if (this->get_rotation() == 270 || this->get_rotation() == 90) {
-            if (player_y > pos_y) {
+        } else if (this->rotation == 270 || this->rotation == 90) {
+            if (player_y > this->position[1]) {
                 y = 1;
-            } else if (player_y < pos_y) {
+            } else if (player_y < this->position[1]) {
                 y = -1;
             }
         }
@@ -237,7 +237,7 @@ void Enemy::shooter_alg() {
     }
 
     if (this->can_shoot()) {
-        if (pos_x == player_x || pos_y == player_y) {
+        if (this->position[0] == player_x || this->position[1] == player_y) {
             this->shoot();
         }
     }

@@ -2,8 +2,16 @@
 
 __USING_API
 
-Text::Text(Alignment alignment, int x, int y, int window_width, int window_height, sf::Font* font, sf::Color color,
-           sf::Color shadow_color, int size, sf::String text)
+Text::Text(Alignment alignment,
+           int x,
+           int y,
+           int window_width,
+           int window_height,
+           sf::Font *font,
+           sf::Color color,
+           sf::Color shadow_color,
+           int size,
+           sf::String text)
     : Widget(alignment, x, y, window_width, window_height) {
     this->_text = new sf::Text();
     this->_shadow = new sf::Text();
@@ -31,7 +39,7 @@ void Text::update(sf::String text) {
     this->_shadow->setString(text);
 }
 
-void Text::render(sf::RenderWindow* window) {
+void Text::render(sf::RenderWindow *window) {
     window->draw(*this->_shadow);
     window->draw(*this->_text);
 }

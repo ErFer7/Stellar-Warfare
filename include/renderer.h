@@ -23,12 +23,12 @@ class Renderer final : public ThreadContainer {
     inline void lock_renderer() { this->_renderer_sem->p(); }
     inline void unlock_renderer() { this->_renderer_sem->v(); }
     inline StateMachine::State get_internal_state() { return this->_internal_state; }
-    static void render(Renderer* renderer);
+    static void render(Renderer *renderer);
 
    private:
     sf::Color _background_color;
     StateMachine::State _internal_state;
-    Semaphore* _renderer_sem;
+    Semaphore *_renderer_sem;
 };
 
 #endif

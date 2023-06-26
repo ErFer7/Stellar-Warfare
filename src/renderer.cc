@@ -19,8 +19,8 @@ void Renderer::handle_event(StateMachine::Event event) {
     this->unlock_renderer();
 }
 
-void Renderer::render(Renderer* renderer) {
-    sf::RenderWindow* window = Game::get_window();
+void Renderer::render(Renderer *renderer) {
+    sf::RenderWindow *window = Game::get_window();
 
     while (true) {
         renderer->lock_renderer();

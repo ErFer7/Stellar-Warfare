@@ -32,43 +32,108 @@ UserInterface::UserInterface() {
         throw std::runtime_error("Could not load font");
     }
 
-    this->_border = new Image(Image::TOP_LEFT, 0, 0, window_width, window_height, this->_border_texture, sf::Color::White, 4.0f);
+    this->_border =
+        new Image(Image::TOP_LEFT, 0, 0, window_width, window_height, this->_border_texture, sf::Color::White, 4.0f);
 
-    this->_title = new Text(Text::TOP_RIGHT, -232, 32, window_width, window_height, this->_font, default_color,
-                            default_shadow_color, 32, "Stellar\nWarfare");
+    this->_title = new Text(Text::TOP_RIGHT,
+                            -232,
+                            32,
+                            window_width,
+                            window_height,
+                            this->_font,
+                            default_color,
+                            default_shadow_color,
+                            32,
+                            "Stellar\nWarfare");
 
-    this->_state_info = new Text(Text::TOP_RIGHT, -232, 128, window_width, window_height, this->_font, default_color,
-                                 default_shadow_color, 16, "Noninitialized:\nPress P to play");
+    this->_state_info = new Text(Text::TOP_RIGHT,
+                                 -232,
+                                 128,
+                                 window_width,
+                                 window_height,
+                                 this->_font,
+                                 default_color,
+                                 default_shadow_color,
+                                 16,
+                                 "Noninitialized:\nPress P to play");
 
-    this->_score_label = new Text(Text::RIGHT, -232, -164, window_width, window_height, this->_font, default_color,
-                                  default_shadow_color, 16, "Score: ");
+    this->_score_label = new Text(Text::RIGHT,
+                                  -232,
+                                  -164,
+                                  window_width,
+                                  window_height,
+                                  this->_font,
+                                  default_color,
+                                  default_shadow_color,
+                                  16,
+                                  "Score: ");
 
-    this->_score = new Text(Text::RIGHT, -150, -164, window_width, window_height, this->_font, default_color,
-                            default_shadow_color, 16, "0");
+    this->_score = new Text(Text::RIGHT,
+                            -150,
+                            -164,
+                            window_width,
+                            window_height,
+                            this->_font,
+                            default_color,
+                            default_shadow_color,
+                            16,
+                            "0");
 
-    this->_health_label = new Text(Text::RIGHT, -232, -128, window_width, window_height, this->_font, default_color,
-                                   default_shadow_color, 16, "HP: ");
+    this->_health_label = new Text(Text::RIGHT,
+                                   -232,
+                                   -128,
+                                   window_width,
+                                   window_height,
+                                   this->_font,
+                                   default_color,
+                                   default_shadow_color,
+                                   16,
+                                   "HP: ");
 
-    this->_heart1 = new Image(Image::RIGHT, -180, -128, window_width, window_height, this->_full_heart_texture,
-                              default_color, 2.0f);
+    this->_heart1 = new Image(
+        Image::RIGHT, -180, -128, window_width, window_height, this->_full_heart_texture, default_color, 2.0f);
 
-    this->_heart2 = new Image(Image::RIGHT, -150, -128, window_width, window_height, this->_full_heart_texture,
-                              default_color, 2.0f);
+    this->_heart2 = new Image(
+        Image::RIGHT, -150, -128, window_width, window_height, this->_full_heart_texture, default_color, 2.0f);
 
-    this->_heart3 = new Image(Image::RIGHT, -120, -128, window_width, window_height, this->_full_heart_texture,
-                              default_color, 2.0f);
+    this->_heart3 = new Image(
+        Image::RIGHT, -120, -128, window_width, window_height, this->_full_heart_texture, default_color, 2.0f);
 
-    this->_level_label = new Text(Text::RIGHT, -232, -92, window_width, window_height, this->_font, default_color,
-                                  default_shadow_color, 16, "Level: ");
+    this->_level_label = new Text(Text::RIGHT,
+                                  -232,
+                                  -92,
+                                  window_width,
+                                  window_height,
+                                  this->_font,
+                                  default_color,
+                                  default_shadow_color,
+                                  16,
+                                  "Level: ");
 
-    this->_level = new Text(Text::RIGHT, -150, -92, window_width, window_height, this->_font, default_color,
-                            default_shadow_color, 16, "1");
+    this->_level = new Text(
+        Text::RIGHT, -150, -92, window_width, window_height, this->_font, default_color, default_shadow_color, 16, "1");
 
-    this->_info = new Text(Text::BOTTOM_RIGHT, -232, -128, window_width, window_height, this->_font, default_color,
-                           default_shadow_color, 12, "This is definitely\na game");
+    this->_info = new Text(Text::BOTTOM_RIGHT,
+                           -232,
+                           -128,
+                           window_width,
+                           window_height,
+                           this->_font,
+                           default_color,
+                           default_shadow_color,
+                           12,
+                           "This is definitely\na game");
 
-    this->_authors = new Text(Text::BOTTOM_RIGHT, -232, -56, window_width, window_height, this->_font, default_color,
-                              default_shadow_color, 12, "INE5412 - 2023.2\nEric - Victor");
+    this->_authors = new Text(Text::BOTTOM_RIGHT,
+                              -232,
+                              -56,
+                              window_width,
+                              window_height,
+                              this->_font,
+                              default_color,
+                              default_shadow_color,
+                              12,
+                              "INE5412 - 2023.2\nEric - Victor");
 }
 
 UserInterface::~UserInterface() {
@@ -92,7 +157,7 @@ UserInterface::~UserInterface() {
     delete this->_user_interface_sem;
 }
 
-void UserInterface::render(sf::RenderWindow* window) {
+void UserInterface::render(sf::RenderWindow *window) {
     this->_user_interface_sem->p();
 
     this->_border->render(window);

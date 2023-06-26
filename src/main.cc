@@ -4,7 +4,7 @@
 __USING_API
 
 int main(void) {
-    System::init((void (*)(void*)) & Game::run);
+    System::init((void (*)(void *)) & Game::run);
 
     return 0;
 }

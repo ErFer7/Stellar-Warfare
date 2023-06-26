@@ -21,8 +21,8 @@ Scene::Scene() {
     this->_enemy_kill_count = 0;
     this->_level = 1;
     this->_scene_sem = new Semaphore(1);
-    this->_enemies = new DynamicArray<Enemy*>(4, nullptr);
-    this->_bullets = new DynamicArray<Bullet*>(10, nullptr);
+    this->_enemies = new DynamicArray<Enemy *>(4, nullptr);
+    this->_bullets = new DynamicArray<Bullet *>(10, nullptr);
     this->_enemy_spawn_times = new DynamicArray<float>(4, -1.0f);
     this->_enemy_spawn_times->fill(-1.0f);
     this->_internal_state = StateMachine::State::NONINITIALIZED;
@@ -92,7 +92,7 @@ void Scene::end_game() {
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
 
         if (enemy) {
             enemy->lock();
@@ -101,7 +101,7 @@ void Scene::end_game() {
     }
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
 
         if (bullet) {
             this->destroy_bullet(i);
@@ -117,7 +117,7 @@ void Scene::update_enemies_speed() {
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
 
         if (enemy) {
             enemy->lock();
@@ -127,7 +127,7 @@ void Scene::update_enemies_speed() {
     }
 }
 
-void Scene::render_background(sf::RenderWindow* window, int noise_range) {
+void Scene::render_background(sf::RenderWindow *window, int noise_range) {
     for (int i = 0; i < this->_height; i++) {
         for (int j = 0; j < this->_width; j++) {
             int noise = random() % (int)noise_range - ceil(noise_range * 0.5f);
@@ -145,7 +145,7 @@ void Scene::render_background(sf::RenderWindow* window, int noise_range) {
     }
 }
 
-void Scene::update_scene(Scene* scene) {
+void Scene::update_scene(Scene *scene) {
     while (true) {
         scene->lock_scene();
         if (scene->get_internal_state() == StateMachine::State::EXIT) {
@@ -228,7 +228,7 @@ void Scene::create_enemy(int spot) {
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
         if (enemy) {
             int x = enemy->get_position()[0];
             int y = enemy->get_position()[1];
@@ -240,7 +240,7 @@ void Scene::create_enemy(int spot) {
     }
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
         if (bullet) {
             int x = bullet->get_position()[0];
             int y = bullet->get_position()[1];
@@ -251,16 +251,21 @@ void Scene::create_enemy(int spot) {
         }
     }
 
-    unsigned int index =
-        this->_enemies->add(new Enemy(spawn_x, spawn_y, spawn_rotation, this->level_speed(), this->_enemy_texture,
-                                      this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
+    unsigned int index = this->_enemies->add(new Enemy(spawn_x,
+                                                       spawn_y,
+                                                       spawn_rotation,
+                                                       this->level_speed(),
+                                                       this->_enemy_texture,
+                                                       this->_scale,
+                                                       this->_scene_offset[0],
+                                                       this->_scene_offset[1]));
     (*this->_enemies)[index]->set_index(index);
     this->_enemy_spawn_count--;
 }
 
 void Scene::create_bullet(int x, int y, int rotation, Entity::Type type) {
-    unsigned int index = this->_bullets->add(new Bullet(x, y, rotation, type, this->_cell_texture, this->_scale,
-                                                        this->_scene_offset[0], this->_scene_offset[1]));
+    unsigned int index = this->_bullets->add(new Bullet(
+        x, y, rotation, type, this->_cell_texture, this->_scale, this->_scene_offset[0], this->_scene_offset[1]));
     (*this->_bullets)[index]->set_index(index);
 }
 
@@ -311,7 +316,7 @@ void Scene::update_all_entities() {
 
     // Processa os inimigos
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
         bool result = true;
 
         if (enemy) {
@@ -351,14 +356,14 @@ void Scene::update_all_entities() {
 
     // Processa as balas
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
         if (bullet) {
             solve_collisions(bullet);
         }
     }
 }
 
-bool Scene::solve_collisions(Entity* entity) {
+bool Scene::solve_collisions(Entity *entity) {
     int new_rotation = entity->get_rotation();
     int target_move_x = entity->get_target_move()[0];
     int target_move_y = entity->get_target_move()[1];
@@ -388,7 +393,7 @@ bool Scene::solve_collisions(Entity* entity) {
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
         if (enemy && entity->get_id() != enemy->get_id()) {
             if (!check_precise_collision(entity, enemy, new_x, new_y)) {
                 return false;
@@ -397,7 +402,7 @@ bool Scene::solve_collisions(Entity* entity) {
     }
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
         if (bullet && entity->get_id() != bullet->get_id()) {
             if (!check_precise_collision(entity, bullet, new_x, new_y)) {
                 return false;
@@ -409,7 +414,7 @@ bool Scene::solve_collisions(Entity* entity) {
     return true;
 }
 
-bool Scene::check_precise_collision(Entity* entity1, Entity* entity2, int new_x, int new_y) {
+bool Scene::check_precise_collision(Entity *entity1, Entity *entity2, int new_x, int new_y) {
     int x2 = entity2->get_position()[0];
     int y2 = entity2->get_position()[1];
     int size1 = entity1->get_size();
@@ -458,7 +463,7 @@ bool Scene::check_corner_collision(int x1, int y1, int x2, int y2, int size1, in
     return !(top_left || top_right || bottom_left || bottom_right);
 }
 
-bool Scene::solve_boundary_collision(Entity* entity, int new_x, int new_y) {
+bool Scene::solve_boundary_collision(Entity *entity, int new_x, int new_y) {
     int offset = entity->get_size() * 0.5f;
     int right = new_x + offset;
     int left = new_x - offset;
@@ -476,16 +481,16 @@ bool Scene::solve_boundary_collision(Entity* entity, int new_x, int new_y) {
     return true;
 }
 
-bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
+bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
     Entity::Type entity1_type = entity1->get_type();
     Entity::Type entity2_type = entity2->get_type();
-    Player* player = nullptr;
-    Enemy* enemy = nullptr;
+    Player *player = nullptr;
+    Enemy *enemy = nullptr;
 
     switch (entity1_type) {
         case Entity::Type::PLAYER:
             if (entity2_type == Entity::Type::ENEMY) {
-                enemy = static_cast<Enemy*>(entity2);
+                enemy = static_cast<Enemy *>(entity2);
                 enemy->lock();
                 destroy_enemy(enemy->get_index());
                 destroy_player();
@@ -494,9 +499,8 @@ bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
                 Game::handle_event(StateMachine::Event::PLAYER_DEATH);
                 return false;
             } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
-                // TODO: Resolver deadlock
                 destroy_bullet(entity2->get_index());
-                player = static_cast<Player*>(entity1);
+                player = static_cast<Player *>(entity1);
                 player->apply_damage(1);
 
                 Game::get_user_interface()->update_health(player->get_health());
@@ -512,7 +516,7 @@ bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
         case Entity::Type::ENEMY:
             if (entity2_type == Entity::Type::PLAYER) {
                 destroy_enemy(entity1->get_index());
-                static_cast<Player*>(entity2)->lock();
+                static_cast<Player *>(entity2)->lock();
                 destroy_player();
                 this->unlock_scene();
                 Game::get_user_interface()->update_health(0);
@@ -532,7 +536,7 @@ bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
         case Entity::Type::PLAYER_BULLET:
             if (entity2_type == Entity::Type::ENEMY) {
                 destroy_bullet(entity1->get_index());
-                enemy = static_cast<Enemy*>(entity2);
+                enemy = static_cast<Enemy *>(entity2);
                 enemy->lock();
                 destroy_enemy(enemy->get_index());
                 this->_score += 100;
@@ -548,7 +552,7 @@ bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
         case Entity::Type::ENEMY_BULLET:
             if (entity2_type == Entity::Type::PLAYER) {
                 destroy_bullet(entity1->get_index());
-                player = static_cast<Player*>(entity2);
+                player = static_cast<Player *>(entity2);
                 player->lock();
                 player->apply_damage(1);
 
@@ -577,7 +581,7 @@ bool Scene::solve_entity_collision(Entity* entity1, Entity* entity2) {
 
 void Scene::update_bullets_behavior() {
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
         if (bullet) {
             bullet->update_behaviour();
         }
@@ -652,8 +656,8 @@ void Scene::handle_event(StateMachine::Event event) {
     this->unlock_scene();
 }
 
-void Scene::render(sf::RenderWindow* window) {
-    this->lock_scene();  // TODO: Verificar se é necessário bloquear a cena para renderizar
+void Scene::render(sf::RenderWindow *window) {
+    this->lock_scene();
     this->render_background(window, 5);
 
     if (this->_player) {
@@ -661,14 +665,14 @@ void Scene::render(sf::RenderWindow* window) {
     }
 
     for (unsigned int i = 0; i < this->_enemies->size(); i++) {
-        Enemy* enemy = (*this->_enemies)[i];
+        Enemy *enemy = (*this->_enemies)[i];
         if (enemy) {
             enemy->render(window);
         }
     }
 
     for (unsigned int i = 0; i < this->_bullets->size(); i++) {
-        Bullet* bullet = (*this->_bullets)[i];
+        Bullet *bullet = (*this->_bullets)[i];
         if (bullet) {
             bullet->render(window);
         }

@@ -20,11 +20,11 @@ class Input final : public ThreadContainer {
     inline void lock_input() { this->_input_sem->p(); }
     inline void unlock_input() { this->_input_sem->v(); }
     inline StateMachine::State get_internal_state() { return this->_internal_state; }
-    static void update_detection(Input* input);
+    static void update_detection(Input *input);
 
    private:
     StateMachine::State _internal_state;
-    Semaphore* _input_sem;
+    Semaphore *_input_sem;
 };
 
 #endif

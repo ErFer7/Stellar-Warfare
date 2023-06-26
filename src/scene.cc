@@ -493,11 +493,18 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
                 enemy = static_cast<Enemy *>(entity2);
                 enemy->lock();
                 destroy_enemy(enemy->get_index());
-                destroy_player();
-                this->unlock_scene();
-                Game::get_user_interface()->update_health(0);
-                Game::handle_event(StateMachine::Event::PLAYER_DEATH);
-                return false;
+
+                player = static_cast<Player *>(entity1);
+                player->apply_damage(1);
+
+                Game::get_user_interface()->update_health(player->get_health());
+
+                if (player->get_health() <= 0) {
+                    destroy_player();
+                    this->unlock_scene();
+                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                    return false;
+                }
             } else if (entity2_type == Entity::Type::ENEMY_BULLET) {
                 destroy_bullet(entity2->get_index());
                 player = static_cast<Player *>(entity1);
@@ -516,11 +523,20 @@ bool Scene::solve_entity_collision(Entity *entity1, Entity *entity2) {
         case Entity::Type::ENEMY:
             if (entity2_type == Entity::Type::PLAYER) {
                 destroy_enemy(entity1->get_index());
-                static_cast<Player *>(entity2)->lock();
-                destroy_player();
-                this->unlock_scene();
-                Game::get_user_interface()->update_health(0);
-                Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+
+                player = static_cast<Player *>(entity2);
+                player->lock();
+                player->apply_damage(1);
+
+                Game::get_user_interface()->update_health(player->get_health());
+
+                if (player->get_health() <= 0) {
+                    destroy_player();
+                    this->unlock_scene();
+                    Game::handle_event(StateMachine::Event::PLAYER_DEATH);
+                } else {
+                    player->unlock();
+                }
                 return false;
             } else if (entity2_type == Entity::Type::ENEMY) {
                 return false;

@@ -44,13 +44,14 @@ class Enemy {
 }
 
 class Entity {
+    # _position[2] : int
+    # _rotation : int
+    # _size : int
+
     {static} - _id_counter : static unsigned int 
     - _id : unsigned int 
     - _index : unsigned int 
-    # _position[2] : int
-    # _rotation : int
     - _target_move[2] : int
-    # _size : int
     - _scene_offset[2] : int
     - _has_target_move : bool
     - _scale : float
@@ -73,13 +74,15 @@ class Entity {
     + has_target_move() : bool 
     + set_index(unsigned int index) : void
     + get_type() : Type
-    + can_move() : bool
     + set_position_and_rotation(int x, int y, int rotation) : void
     + render(sf::RenderWindow* window) : void
-    + set_target_move(int x, int y) : void
     + reset_target_move() : void
     + set_speed(float speed) : void
+
     # set_graphics(sf::Texture* texture) : void
+    # can_move() : bool
+    # set_target_move(int x, int y) : void
+
     - update_sprite() : void
 }
 
@@ -356,6 +359,7 @@ class Semaphore #FFAAAA {
     + ~Semaphore()
     + p() : void
     + v() : void
+
     - finc(int number) : int
     - fdec(int number) : int
     - sleep() : void

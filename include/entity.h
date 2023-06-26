@@ -38,14 +38,14 @@ class Entity {
     inline void set_index(unsigned int index) { this->_index = index; }
     inline Type get_type() { return this->_type; }
     inline void set_speed(float speed) { this->_speed = speed; }
-    bool can_move();
     void set_position_and_rotation(int x, int y, int rotation);
     void render(sf::RenderWindow *window);
-    void set_target_move(int x, int y);
     void reset_target_move();
 
    protected:
     void set_graphics(sf::Texture *texture);
+    bool can_move();
+    void set_target_move(int x, int y);
 
    protected:
     int position[2];

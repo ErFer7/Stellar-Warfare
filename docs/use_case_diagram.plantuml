@@ -17,4 +17,6 @@ rectangle Game {
     Player -- (Restart game)
     (Player loses) .right.> (Restart game) : <<include>>
 }
+(Unpause game)
+(Increase speed)
 @enduml

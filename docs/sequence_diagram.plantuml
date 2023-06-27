@@ -1,0 +1,257 @@
+@startuml
+
+participant " : Player" as Player
+participant " : Spaceship" as Spaceship
+participant " : Entity" as Entity
+participant " : Semaphore" as Semaphore
+participant " : Thread" as Thread
+participant " : CPU" as CPU
+boundary " : UContext" as UContext
+
+box "Game" #CEC4E1
+	participant Player
+	participant Spaceship
+	participant Entity
+end box
+
+
+box "Threads library" #LightBlue
+	participant Semaphore
+	participant Thread
+	participant CPU
+	participant UContext
+end box
+
+autonumber
+== Initialization ==
+Player -> Thread : new Thread(update_behaviour, this)
+activate Player
+activate Thread
+Thread -> CPU : new Context(func, an...)
+activate CPU
+CPU -> UContext : getcontext(context)
+activate UContext
+UContext --> CPU
+deactivate UContext
+CPU -> UContext : makecontext(context, func, an...)
+activate UContext
+UContext --> CPU
+deactivate UContext
+CPU --> Thread
+deactivate CPU
+Thread --> Player
+deactivate Thread
+== Behaviour Loop ==
+loop true
+Player -> Semaphore : p()
+activate Semaphore
+Semaphore -> CPU : fdec(sem_value)
+activate CPU
+CPU --> Semaphore : int fdec(sem_value)
+deactivate CPU
+	alt fdec(sem_value) < 1
+	Semaphore -> Semaphore : sleep()
+	Semaphore -> Thread : sleep(sleeping_queue)
+	activate Thread
+	Thread -> Thread : yield()
+	Thread -> Thread : switch_context(previous, next)
+	Thread -> CPU : switch_context(previous, next)
+	activate CPU
+	CPU --> Thread 
+	deactivate CPU
+	deactivate Thread
+	else else case
+	Semaphore --> Player
+	deactivate Semaphore
+	end
+Player -> Semaphore : v()
+activate Semaphore
+Semaphore -> CPU : finc(sem_value)
+activate CPU
+CPU --> Semaphore : int finc(sem_value)
+deactivate CPU
+	alt finc(sem_value) < 0
+	Semaphore -> Semaphore : wakeup()
+	Semaphore -> Thread : wakeup(sleeping_queue)
+	activate Thread
+		alt !sleeping_queue.empty() && sleeping_queue.top() != null
+		Thread -> Thread : yield()
+		Thread -> Thread : switch_context(previous, next)
+		Thread -> CPU : switch_context(previous, next)
+		activate CPU
+		CPU --> Thread
+		deactivate CPU
+		deactivate Thread
+		end
+	else else case
+	Semaphore --> Player
+	deactivate Semaphore
+	end
+Player -> Spaceship : lock()
+activate Spaceship
+Spaceship -> Semaphore : p()
+activate Semaphore
+Semaphore -> CPU : fdec(sem_value)
+activate CPU
+CPU --> Semaphore : int fdec(sem_value)
+deactivate CPU
+	alt fdec(sem_value) < 1
+	Semaphore -> Semaphore : sleep()
+	Semaphore -> Thread : sleep(sleeping_queue)
+	Thread -> Thread : yield()
+	Thread -> Thread : switch_context(previous, next)
+	Thread -> CPU : switch_context(previous, next)
+	CPU --> Thread
+	deactivate Thread
+	deactivate CPU
+	else else case
+	Semaphore --> Spaceship
+	deactivate Semaphore
+	Spaceship --> Player
+	deactivate Spaceship
+	end
+Player -> Spaceship : get_health()
+activate Spaceship
+Spaceship --> Player : int health
+deactivate Spaceship
+	alt health <= 0
+	Player -> Spaceship : unlock()
+	deactivate Player
+	activate Spaceship
+	Spaceship -> Semaphore : v()
+	activate Semaphore
+	Semaphore -> CPU : finc(sem_value)
+	activate CPU
+	CPU --> Semaphore : int finc(sem_value)
+	deactivate CPU
+		alt finc(sem_value) < 0
+		Semaphore -> Semaphore : wakeup()
+		Semaphore -> Thread : wakeup(sleeping_queue)
+		activate Thread
+			alt !sleeping_queue.empty() && sleeping_queue.top() != null
+			Thread -> Thread : yield()
+			Thread -> Thread : switch_context(previous, next)
+			Thread -> CPU : switch_context(previous, next)
+			activate CPU
+			CPU --> Thread 
+			deactivate CPU
+			deactivate Thread
+			end
+		else else case
+		Semaphore --> Spaceship
+		deactivate Semaphore
+		end
+	end
+Player -> Spaceship : can_move()
+activate Player
+activate Spaceship
+Spaceship -> Entity : can_move()
+activate Entity
+Entity --> Spaceship : bool can_move
+deactivate Entity
+Spaceship --> Player : bool can_move
+deactivate Spaceship
+	alt can_move
+		alt event == up
+		Player -> Spaceship : set_target_move(0, -1)
+		activate Spaceship
+		Spaceship -> Entity : set_target_move(0, -1)
+		activate Entity
+		Entity --> Spaceship
+		deactivate Entity
+		Spaceship --> Player
+		deactivate Spaceship
+		else event == down
+		Player -> Spaceship : set_target_move(0, 1)
+		activate Spaceship
+		Spaceship -> Entity : set_target_move(0, 1)
+		activate Entity
+		Entity --> Spaceship
+		deactivate Entity
+		Spaceship --> Player
+		deactivate Spaceship
+		else event == right
+		Player -> Spaceship : set_target_move(1, 0)
+		activate Spaceship
+		Spaceship -> Entity : set_target_move(1, 0)
+		activate Entity
+		Entity --> Spaceship
+		deactivate Entity
+		Spaceship --> Player
+		deactivate Spaceship
+		else event == left
+		Player -> Spaceship : set_target_move(-1, 0)
+		activate Spaceship
+		Spaceship -> Entity : set_target_move(-1, 0)
+		activate Entity
+		Entity --> Spaceship
+		deactivate Entity
+		Spaceship --> Player
+		deactivate Spaceship
+		else default
+		end
+	end
+Player -> Spaceship : can_shoot()
+activate Spaceship
+Spaceship --> Player : bool can_shoot()
+deactivate Spaceship
+	alt can_shoot && event == space
+	Player -> Spaceship : shoot()
+	activate Spaceship
+	Spaceship --> Player
+	deactivate Spaceship
+Player -> Spaceship : unlock()
+activate Spaceship
+Spaceship -> Semaphore : v()
+activate Semaphore
+Semaphore -> CPU : finc(sem_value)
+activate CPU
+CPU --> Semaphore : int finc(sem_value)
+deactivate CPU
+	alt finc(sem_value) < 0
+	Semaphore -> Semaphore : wakeup()
+	Semaphore -> Thread : wakeup(sleeping_queue)
+	activate Thread
+		alt !sleeping_queue.empty() && sleeping_queue.top() != null
+		Thread -> Thread : yield()
+		Thread -> Thread : switch_context(previous, next)
+		Thread -> CPU : switch_context(previous, next)
+		activate CPU
+		CPU --> Thread 
+		deactivate CPU
+		deactivate Thread
+		end
+	else else case
+	Semaphore --> Spaceship
+	deactivate Semaphore
+	Spaceship --> Player
+	deactivate Spaceship
+	end
+Player -> Thread : yield()
+Thread -> Thread : switch_context(previous, next)
+Thread -> CPU : switch_context(previous, next)
+activate CPU
+CPU --> Thread 
+deactivate CPU
+Thread --> Player
+deactivate Thread
+end
+== Termination ==
+Player -> Thread : thread_exit()
+activate Thread
+	alt waiting_join
+		alt waiting_id != main_id
+		Thread -> Thread : resume()
+		else else case
+		Thread -> Thread : switch_context(this, main)
+		Thread -> CPU : switch_context(previous, next)
+		activate CPU
+		CPU --> Thread 
+		deactivate CPU
+		end
+	end
+Thread -> Thread : yield()
+deactivate Thread
+deactivate Player
+
+@enduml

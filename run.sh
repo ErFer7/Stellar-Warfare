@@ -1,2 +1,3 @@
 make
-"./bin/Spaceship game"
+cd bin
+"./Spaceship game"

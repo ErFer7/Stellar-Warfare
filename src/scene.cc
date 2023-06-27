@@ -33,15 +33,15 @@ Scene::Scene() {
     this->_cell_texture = new sf::Texture();
     this->_background_cell = new sf::Sprite();
 
-    if (!this->_player_texture->loadFromFile("assets/sprites/player.png")) {
+    if (!this->_player_texture->loadFromFile("../assets/sprites/player.png")) {
         throw std::runtime_error("Could not load player texture");
     }
 
-    if (!this->_enemy_texture->loadFromFile("assets/sprites/enemy.png")) {
+    if (!this->_enemy_texture->loadFromFile("../assets/sprites/enemy.png")) {
         throw std::runtime_error("Could not load enemy texture");
     }
 
-    if (!this->_cell_texture->loadFromFile("assets/sprites/cell.png")) {
+    if (!this->_cell_texture->loadFromFile("../assets/sprites/cell.png")) {
         throw std::runtime_error("Could not load cell texture");
     }
 

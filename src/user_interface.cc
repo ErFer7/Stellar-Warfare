@@ -16,19 +16,19 @@ UserInterface::UserInterface() {
     this->_full_heart_texture = new sf::Texture();
     this->_font = new sf::Font();
 
-    if (!this->_border_texture->loadFromFile("assets/sprites/border.png")) {
+    if (!this->_border_texture->loadFromFile("../assets/sprites/border.png")) {
         throw std::runtime_error("Could not load border texture");
     }
 
-    if (!this->_empty_heart_texture->loadFromFile("assets/sprites/empty_heart.png")) {
+    if (!this->_empty_heart_texture->loadFromFile("../assets/sprites/empty_heart.png")) {
         throw std::runtime_error("Could not load border texture");
     }
 
-    if (!this->_full_heart_texture->loadFromFile("assets/sprites/full_heart.png")) {
+    if (!this->_full_heart_texture->loadFromFile("../assets/sprites/full_heart.png")) {
         throw std::runtime_error("Could not load border texture");
     }
 
-    if (!this->_font->loadFromFile("assets/fonts/joystix monospace.ttf")) {
+    if (!this->_font->loadFromFile("../assets/fonts/joystix monospace.ttf")) {
         throw std::runtime_error("Could not load font");
     }
 

@@ -2,21 +2,42 @@
 left to right direction
 skinparam packageStyle rect
 skinparam actorStyle awesome
-actor Player
-rectangle Game {
-    Player -- (Start game)
-    Player -- (Pause game)
-    Player -- (Quit game)
-    Player -- (Move)
-    (Move) .down.> (Player hit) : <<include>>
-    (Player hit) .right.> (Player loses) : <<include>>
-    Player -- (Shoot)
-    (Shoot) .down.> (Enemy hit) : <<include>>
-    (Enemy hit) .right.> (Player wins) : <<include>>
-    (Start game) .down.> (Display score) : <<include>>
-    Player -- (Restart game)
-    (Player loses) .right.> (Restart game) : <<include>>
+actor Player #508999
+actor Enemies #508999
+rectangle Game #78BCD5{
+    usecase "Start game" as UC1
+    usecase "Move player" as UC2
+    usecase "Move enemies" as UC3
+    usecase "Shoot" as UC4
+    usecase "Detect collision" as UC5
+    usecase "Update score" as UC6
+    usecase "Update lives" as UC7
+    usecase "Increase speed" as UC8
+    usecase "Win condition" as UC9
+    usecase "Lose condition" as UC10
+    usecase "Pause game" as UC11
+    usecase "Unpause game" as UC12
+    usecase "Quit game" as UC13
+
+    Player --> UC1
+    Player --> UC2
+    Player --> UC4
+    Player --> UC11
+    Player --> UC12
+    Player --> UC13
+
+    Enemies --> UC3
+
+    UC5 .up.> UC4 : <<extend>>
+    UC5 .up.> UC2 : <<extend>>
+
+    UC6 .up.> UC5 : <<extend>>
+    UC7 .up.> UC5 : <<extend>>
+
+    UC9 <.down. UC6 : <<include>>
+    UC10 <.left. UC7 : <<include>>
+
+    UC8 .left.> UC6 : <<extend>>
 }
-(Unpause game)
-(Increase speed)
+
 @enduml

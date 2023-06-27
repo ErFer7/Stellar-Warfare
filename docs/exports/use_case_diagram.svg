@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="502px" preserveAspectRatio="none" style="width:846px;height:502px;background:#FFFFFF;" version="1.1" viewBox="0 0 846 502" width="846px" zoomAndPan="magnify"><defs/><g><!--MD5=[2b611c2d60e481aa2035053367969193]
+cluster Game--><g id="cluster_Game"><rect fill="#78BCD5" height="484" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="727" x="113" y="7"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="45" x="454" y="21.9951">Game</text></g><g id="elem_UC1"><ellipse cx="203.7248" cy="188.145" fill="#F1F1F1" rx="63.7248" ry="15.145" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="75" x="163.2248" y="191.8925">Start game</text></g><g id="elem_UC2"><ellipse cx="203.613" cy="58.1226" fill="#F1F1F1" rx="66.113" ry="15.6226" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="82" x="159.613" y="61.8702">Move player</text></g><g id="elem_UC3"><ellipse cx="203.5678" cy="458.0136" fill="#F1F1F1" rx="73.0678" ry="17.0136" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="101" x="150.0678" y="461.7611">Move enemies</text></g><g id="elem_UC4"><ellipse cx="203.6638" cy="123.0812" fill="#F1F1F1" rx="40.6638" ry="14.5812" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="180.5122" y="126.7432">Shoot</text></g><g id="elem_UC5"><ellipse cx="474.9948" cy="133.899" fill="#F1F1F1" rx="74.9948" ry="17.399" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="106" x="418.9948" y="137.6465">Detect collision</text></g><g id="elem_UC6"><ellipse cx="748.5634" cy="298.9127" fill="#F1F1F1" rx="70.0634" ry="16.4127" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="93" x="699.0634" y="302.6602">Update score</text></g><g id="elem_UC7"><ellipse cx="748.3142" cy="143.7628" fill="#F1F1F1" rx="66.8142" ry="15.7628" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="84" x="703.3142" y="147.5104">Update lives</text></g><g id="elem_UC8"><ellipse cx="748.3844" cy="212.9769" fill="#F1F1F1" rx="75.3844" ry="17.4769" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="107" x="691.8844" y="216.7244">Increase speed</text></g><g id="elem_UC9"><ellipse cx="475.0634" cy="298.9127" fill="#F1F1F1" rx="70.0634" ry="16.4127" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="93" x="425.5634" y="302.6602">Win condition</text></g><g id="elem_UC10"><ellipse cx="748.5678" cy="59.0136" fill="#F1F1F1" rx="73.0678" ry="17.0136" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="101" x="695.0678" y="62.7611">Lose condition</text></g><g id="elem_UC11"><ellipse cx="203.5233" cy="253.9047" fill="#F1F1F1" rx="67.5233" ry="15.9047" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="86" x="157.5233" y="257.6522">Pause game</text></g><g id="elem_UC12"><ellipse cx="203.6066" cy="322.8213" fill="#F1F1F1" rx="74.6066" ry="17.3213" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="148.1066" y="326.5689">Unpause game</text></g><g id="elem_UC13"><ellipse cx="203.4096" cy="390.8819" fill="#F1F1F1" rx="62.4096" ry="14.8819" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="71" x="164.9096" y="394.6295">Quit game</text></g><!--MD5=[de2effd8dc5bf946a609466312d0f75f]
+entity Player--><g id="elem_Player"><ellipse cx="36" cy="200" fill="#508999" rx="16" ry="16" style="stroke:#181818;stroke-width:1.5;"/><path d="M36,220 C40,220 43,220 47,216 C55,216 63,224 63,232 L63,236 C63,240 59,244 55,244 L17,244 C13,244 9,240 9,236 L9,232 C9,224 17,216 25,216 C29,220 32,220 36,220 " fill="#508999" style="stroke:#181818;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="15.5" y="258.4951">Player</text></g><!--MD5=[e735c530fe44858270fd562c6affa601]
+entity Enemies--><g id="elem_Enemies"><ellipse cx="36" cy="436" fill="#508999" rx="16" ry="16" style="stroke:#181818;stroke-width:1.5;"/><path d="M36,456 C40,456 43,456 47,452 C55,452 63,460 63,468 L63,472 C63,476 59,480 55,480 L17,480 C13,480 9,476 9,472 L9,468 C9,460 17,452 25,452 C29,456 32,456 36,456 " fill="#508999" style="stroke:#181818;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="60" x="6" y="494.4951">Enemies</text></g><!--MD5=[2e992342d728e255a80bb91631392cde]
+link Player to UC1--><g id="link_Player_UC1"><path d="M64.7,216.31 C87.83,211.56 121.46,204.65 149.71,198.85 " fill="none" id="Player-to-UC1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="154.92,197.78,145.3019,195.6604,150.021,198.7798,146.9016,203.4989,154.92,197.78" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[2dbf59d65486de619fe8e220b61b7e80]
+link Player to UC2--><g id="link_Player_UC2"><path d="M48.69,182.21 C59.11,153.21 77.09,114.95 105,91 C116.7,80.96 131.58,73.94 146.17,69.05 " fill="none" id="Player-to-UC2" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="151.11,67.47,141.3178,66.415,146.3497,68.9996,143.7651,74.0315,151.11,67.47" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[2668c15d6fe4cb749bfbdd94da3e9714]
+link Player to UC4--><g id="link_Player_UC4"><path d="M64.56,189.02 C76.03,176.96 90.14,164.06 105,155 C122.66,144.23 144.35,136.65 162.79,131.58 " fill="none" id="Player-to-UC4" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="167.89,130.21,158.1607,128.6801,163.061,131.5063,160.2348,136.4066,167.89,130.21" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[c069fb24b1a4213f292c41bd60c190e3]
+link Player to UC11--><g id="link_Player_UC11"><path d="M64.7,227.36 C86.7,231.61 118.21,237.7 145.55,242.99 " fill="none" id="Player-to-UC11" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="150.6,243.96,142.5179,238.3315,145.6901,243.0152,141.0063,246.1874,150.6,243.96" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[d23b353e7a8b07322c0176871b7b110d]
+link Player to UC12--><g id="link_Player_UC12"><path d="M64.56,253.35 C76.13,265.11 90.32,277.83 105,287 C118.61,295.5 134.54,302.44 149.52,307.88 " fill="none" id="Player-to-UC12" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="154.56,309.66,147.4205,302.8756,149.849,307.9847,144.74,310.4132,154.56,309.66" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[671a7ef9bfe32bb20430a6fa403adb62]
+link Player to UC13--><g id="link_Player_UC13"><path d="M47.78,261.73 C57.91,292.01 75.94,332.68 105,358 C117.04,368.49 132.57,375.68 147.67,380.6 " fill="none" id="Player-to-UC13" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="152.77,382.18,145.3661,375.6852,147.9961,380.6935,142.9877,383.3235,152.77,382.18" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[e4efe72351c71963d76c50da786090c5]
+link Enemies to UC3--><g id="link_Enemies_UC3"><path d="M66.21,458 C82.7,458 104.17,458 125.17,458 " fill="none" id="Enemies-to-UC3" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="130.21,458,121.21,454,125.21,458,121.21,462,130.21,458" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[a968fbaac58efeb132d6ac956b4a4ded]
+reverse link UC4 to UC5--><g id="link_UC4_UC5"><path d="M249.15,124.82 C290.39,126.51 352.41,129.04 400.87,131.02 " fill="none" id="UC4-backto-UC5" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="243.98,124.61,252.8124,128.9675,248.976,124.8104,253.1331,120.974,243.98,124.61" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="60" x="309" y="124.0669">«extend»</text></g><!--MD5=[2703d3f9d28ab38b13b2399a6beb8d63]
+reverse link UC2 to UC5--><g id="link_UC2_UC5"><path d="M253.33,70.94 C286.33,79.77 330.86,91.85 370,103 C389.21,108.47 410.34,114.73 428.51,120.18 " fill="none" id="UC2-backto-UC5" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="248.14,69.56,255.8077,75.7411,252.9716,70.8465,257.8662,68.0104,248.14,69.56" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="60" x="309" y="83.0669">«extend»</text></g><!--MD5=[23f849f0b8ed3146df21555be77ceecd]
+reverse link UC5 to UC6--><g id="link_UC5_UC6"><path d="M507.48,153.13 C561.86,186.18 672.38,253.35 722.17,283.61 " fill="none" id="UC5-backto-UC6" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="503.03,150.42,508.638,158.5163,507.301,153.0197,512.7976,151.6827,503.03,150.42" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="60" x="581.5" y="198.0669">«extend»</text></g><!--MD5=[0f2e5f03a66900213cdd197cf7e1d9c9]
+reverse link UC5 to UC7--><g id="link_UC5_UC7"><path d="M554.51,136.89 C594.98,138.38 643.75,140.18 682.14,141.59 " fill="none" id="UC5-backto-UC7" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="549.11,136.69,557.9553,141.0213,554.1066,136.8756,558.2523,133.0268,549.11,136.69" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="60" x="581.5" y="135.0669">«extend»</text></g><!--MD5=[9e94b5c67f9724ceb33f31d89fcee6b7]
+reverse link UC9 to UC6--><g id="link_UC9_UC6"><path d="M550.54,299 C590.47,299 639.34,299 678.41,299 " fill="none" id="UC9-backto-UC6" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="545.21,299,554.21,303,550.21,299,554.21,295,545.21,299" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="61" x="581" y="295.0669">«include»</text></g><!--MD5=[f5c4e274000c7e350e185e93ca73978c]
+link UC7 to UC10--><g id="link_UC7_UC10"><path d="M748.5,127.61 C748.5,114.46 748.5,95.87 748.5,81.36 " fill="none" id="UC7-to-UC10" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="748.5,76.21,744.5,85.21,748.5,81.21,752.5,85.21,748.5,76.21" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="61" x="706.5" y="106.5669">«include»</text></g><!--MD5=[70ac3c5ec7b51b0cbdef358ee980266b]
+reverse link UC6 to UC8--><g id="link_UC6_UC8"><path d="M748.5,277.32 C748.5,262.91 748.5,244.23 748.5,230.71 " fill="none" id="UC6-backto-UC8" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="748.5,282.42,752.5,273.42,748.5,277.42,744.5,273.42,748.5,282.42" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="60" x="707" y="261.0669">«extend»</text></g><!--MD5=[97e37b798ad5b81dd62a33da7475a2ab]
+@startuml
+left to right direction
+skinparam packageStyle rect
+skinparam actorStyle awesome
+actor Player #508999
+actor Enemies #508999
+rectangle Game #78BCD5{
+    usecase "Start game" as UC1
+    usecase "Move player" as UC2
+    usecase "Move enemies" as UC3
+    usecase "Shoot" as UC4
+    usecase "Detect collision" as UC5
+    usecase "Update score" as UC6
+    usecase "Update lives" as UC7
+    usecase "Increase speed" as UC8
+    usecase "Win condition" as UC9
+    usecase "Lose condition" as UC10
+    usecase "Pause game" as UC11
+    usecase "Unpause game" as UC12
+    usecase "Quit game" as UC13
+
+    Player - -> UC1
+    Player - -> UC2
+    Player - -> UC4
+    Player - -> UC11
+    Player - -> UC12
+    Player - -> UC13
+
+    Enemies - -> UC3
+
+    UC5 .up.> UC4 : <<extend>>
+    UC5 .up.> UC2 : <<extend>>
+
+    UC6 .up.> UC5 : <<extend>>
+    UC7 .up.> UC5 : <<extend>>
+
+    UC9 <.down. UC6 : <<include>>
+    UC10 <.left. UC7 : <<include>>
+
+    UC8 .left.> UC6 : <<extend>>
+}
+
+@enduml
+
+PlantUML version 1.2022.7(Mon Aug 22 14:01:30 BRT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

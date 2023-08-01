@@ -1,32 +1,25 @@
 #ifndef thread_h
 #define thread_h
 
+#include <chrono>
+#include <ctime>
+
 #include "cpu.h"
-#include "traits.h"
 #include "debug.h"
 #include "list.h"
-#include <ctime>
-#include <chrono>
+#include "traits.h"
 
 __BEGIN_API
 
-class Thread
-{
-protected:
+class Thread {
+   protected:
     typedef CPU::Context Context;
 
-public:
+   public:
     typedef Ordered_List<Thread> Ordered_Queue;
 
     // Thread State
-    enum State
-    {
-        RUNNING,
-        READY,
-        FINISHING,
-        SUSPENDED,
-        WAITING
-    };
+    enum State { RUNNING, READY, FINISHING, SUSPENDED, WAITING };
 
     /*
      * Construtor vazio. Necessário para inicialização, mas sem importância para a execução das Threads.
@@ -129,7 +122,7 @@ public:
      */
     Ordered_Queue::Element *get_link() { return &(this->_link); }
 
-private:
+   private:
     int _id;
     Context *volatile _context;
     static Thread *_running;
@@ -149,26 +142,26 @@ private:
 };
 
 template <typename... Tn>
-Thread::Thread(void (*func)(Tn...), Tn... an) : _link(this, (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()))
-{
+Thread::Thread(void (*func)(Tn...), Tn... an)
+    : _link(this,
+            (std::chrono::duration_cast<std::chrono::microseconds>(
+                 std::chrono::high_resolution_clock::now().time_since_epoch())
+                 .count())) {
     db<Thread>(TRC) << "Thread constructor called\n";
     this->_context = new Context(func, an...);
 
-    if (this->_context)
-    {
+    if (this->_context) {
         this->_id = _id_counter++;
         this->_waiting_join = nullptr;
 
-        if (this->_id != 0) // A thread main não deve ser inserida na fila de prontos
+        if (this->_id != 0)  // A thread main não deve ser inserida na fila de prontos
         {
             this->_state = READY;
             _ready.insert(&_link);
         }
 
         db<Thread>(INF) << "Created Thread with context: " << this->_context << " for thread: " << this->_id << "\n";
-    }
-    else
-    {
+    } else {
         db<Thread>(ERR) << "Thread: failed to create context!\n";
         exit(-1);
     }

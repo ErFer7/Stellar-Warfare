@@ -2,27 +2,23 @@
 #define semaphore_h
 
 #include "cpu.h"
+#include "debug.h"
 #include "thread.h"
 #include "traits.h"
-#include "debug.h"
 
 __BEGIN_API
 
-class Semaphore
-{
-public:
+class Semaphore {
+   public:
     typedef Ordered_List<Thread> Ordered_Queue;
 
-    Semaphore(int v = 1)
-    {
-        this->value = v;
-    }
+    Semaphore(int v = 1) { this->value = v; }
     ~Semaphore();
 
     void p();
     void v();
 
-private:
+   private:
     // Atomic operations
     int finc(volatile int &number);
     int fdec(volatile int &number);
@@ -32,7 +28,7 @@ private:
     void wakeup();
     void wakeup_all();
 
-private:
+   private:
     // Added attributes
     volatile int value;
     Ordered_Queue sleeping_queue;

@@ -4,40 +4,31 @@
 
 __BEGIN_API
 
-void CPU::Context::save()
-{
+void CPU::Context::save() {
     getcontext(&this->_context);
     db<CPU>(TRC) << "CPU::Context::save() called\n";
 }
 
-void CPU::Context::load()
-{
-    if (&this->_context)
-    {
+void CPU::Context::load() {
+    if (&this->_context) {
         setcontext(&this->_context);
     }
     db<CPU>(TRC) << "CPU::Context::load() called\n";
 }
 
-CPU::Context::~Context()
-{
+CPU::Context::~Context() {
     db<CPU>(TRC) << "CPU::Context destructor called by Context " << this << "\n";
-    if (this->_stack)
-    {
+    if (this->_stack) {
         delete[] this->_stack;
         this->_stack = NULL;
-    }
-    else
-    {
+    } else {
         db<CPU>(ERR) << "CPU::Context destructor tried to deallocate null stack\n";
     }
 }
 
-int CPU::switch_context(Context *from, Context *to)
-{
+int CPU::switch_context(Context *from, Context *to) {
     db<CPU>(TRC) << "CPU::switch_context called\n";
-    if (!from || !to)
-    {
+    if (!from || !to) {
         db<CPU>(ERR) << "CPU::switch_context: from or to is null\n";
         return -1;
     }
@@ -47,29 +38,21 @@ int CPU::switch_context(Context *from, Context *to)
     return 0;
 }
 
-int CPU::finc(volatile int &number)
-{
+int CPU::finc(volatile int &number) {
     db<CPU>(TRC) << "CPU::finc called\n";
 
     int result = 1;
-    asm volatile("lock xadd %0, %2"
-                 : "=a"(result)
-                 : "a"(result), "m"(number)
-                 : "memory");
+    asm volatile("lock xadd %0, %2" : "=a"(result) : "a"(result), "m"(number) : "memory");
 
     db<CPU>(INF) << "CPU::finc: result =" << result + 1 << "\n";
     return result;
 }
 
-int CPU::fdec(volatile int &number)
-{
+int CPU::fdec(volatile int &number) {
     db<CPU>(TRC) << "CPU::fdec called\n";
 
     int result = -1;
-    asm volatile("lock xadd %0, %2"
-                 : "=a"(result)
-                 : "a"(result), "m"(number)
-                 : "memory");
+    asm volatile("lock xadd %0, %2" : "=a"(result) : "a"(result), "m"(number) : "memory");
 
     db<CPU>(INF) << "CPU::fdec: result =" << result - 1 << "\n";
     return result;

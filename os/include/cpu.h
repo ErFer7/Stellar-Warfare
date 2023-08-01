@@ -2,21 +2,21 @@
 #define cpu_h
 
 #include <ucontext.h>
+
 #include <iostream>
-#include "traits.h"
+
 #include "debug.h"
+#include "traits.h"
 
 __BEGIN_API
 
-class CPU
-{
-public:
-    class Context
-    {
-    private:
+class CPU {
+   public:
+    class Context {
+       private:
         static const unsigned int STACK_SIZE = Traits<CPU>::STACK_SIZE;
 
-    public:
+       public:
         Context() { _stack = 0; }
 
         template <typename... Tn>
@@ -27,14 +27,14 @@ public:
         void save();
         void load();
 
-    private:
+       private:
         char *_stack;
 
-    public:
+       public:
         ucontext_t _context;
     };
 
-public:
+   public:
     static int switch_context(Context *from, Context *to);
 
     static int finc(volatile int &number);
@@ -43,15 +43,13 @@ public:
 };
 
 template <typename... Tn>
-CPU::Context::Context(void (*func)(Tn...), Tn... an)
-{
+CPU::Context::Context(void (*func)(Tn...), Tn... an) {
     db<CPU>(TRC) << "CPU::Context constructor called\n";
     getcontext(&this->_context);
 
     this->_stack = new char[STACK_SIZE];
 
-    if (!this->_stack)
-    {
+    if (!this->_stack) {
         db<CPU>(ERR) << "CPU::Context constructor failed to allocate stack\n";
         exit(-1);
     }

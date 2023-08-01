@@ -3,9 +3,7 @@
 
 // Não alterar as 3 declarações abaixo
 
-#define __BEGIN_API    \
-    namespace SOLUTION \
-    {
+#define __BEGIN_API namespace SOLUTION {
 #define __END_API }
 #define __USING_API using namespace SOLUTION;
 
@@ -21,14 +19,12 @@ class Semaphore;
 
 // declaração da classe Traits
 template <typename T>
-struct Traits
-{
+struct Traits {
     static const bool debugged = true;
 };
 
 template <>
-struct Traits<Debug> : public Traits<void>
-{
+struct Traits<Debug> : public Traits<void> {
     static const bool error = true;
     static const bool warning = true;
     static const bool info = true;
@@ -36,33 +32,28 @@ struct Traits<Debug> : public Traits<void>
 };
 
 template <>
-struct Traits<CPU> : public Traits<void>
-{
+struct Traits<CPU> : public Traits<void> {
     static const unsigned int STACK_SIZE = 128000;
     static const bool debugged = false;
 };
 
 template <>
-struct Traits<Thread> : public Traits<void>
-{
+struct Traits<Thread> : public Traits<void> {
     static const bool debugged = false;
 };
 
 template <>
-struct Traits<System> : public Traits<void>
-{
+struct Traits<System> : public Traits<void> {
     static const bool debugged = false;
 };
 
 template <>
-struct Traits<Lists> : public Traits<void>
-{
+struct Traits<Lists> : public Traits<void> {
     static const bool debugged = false;
 };
 
 template <>
-struct Traits<Semaphore> : public Traits<void>
-{
+struct Traits<Semaphore> : public Traits<void> {
     static const bool debugged = false;
 };
 

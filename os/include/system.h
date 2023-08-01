@@ -2,14 +2,14 @@
 #define system_h
 
 #include <stdio.h>
-#include "traits.h"
+
 #include "debug.h"
+#include "traits.h"
 
 __BEGIN_API
 
-class System
-{
-public:
+class System {
+   public:
     /*
      * Este método irá realizar a inicialização de todas as variáveis internas do SO.
      * Por enquanto deve apenas desativar o buffer de saída padrão usado pelo cout.
